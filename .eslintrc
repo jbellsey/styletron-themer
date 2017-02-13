@@ -1,0 +1,41 @@
+{
+  // most of the following ceremony is required.
+  // customizations are at the end.
+  //
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended"
+  ],
+  "plugins": [
+    "react"
+  ],
+  "env": {
+    "browser": true,
+    "commonjs": true,
+    "es6": true
+  },
+  "globals": {
+    "__DEV__": false,
+    "__PROD__": false,
+    "__DEBUG__": false,
+    "__COVERAGE__": false,
+    "__BASENAME__": false,
+    "process": true
+  },
+
+  "rules": {
+    "semi":    [2, "always"],
+    "max-len": [2, 140, 2],
+    "react/prop-types": [2, {
+      // suppress warnings for some missing propTypes. these props are available on
+      // every component in this repo, making these particular warnings pure noise.
+      "ignore": ["children", "className", "inlineStyles", "stripProps"]
+    }]
+  }
+}
