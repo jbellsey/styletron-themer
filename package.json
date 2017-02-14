@@ -4,10 +4,9 @@
   "description": "UI component library for Gnosis applications",
   "main": "dist/index.js",
   "scripts": {
-    "prebuild": "npm run clean",
+    "prebuild": "rm -rf dist/; mkdir dist;",
     "build": "babel src --ignore spec.js,spec-helpers/**.js --out-dir dist",
     "postbuild": "git add ./dist",
-    "clean": "rm -rf dist/; mkdir dist;",
     "test": "karma start",
     "test:ci": "TEST_ENV=ci karma start",
     "lint": "eslint .",

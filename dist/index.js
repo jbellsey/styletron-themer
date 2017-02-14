@@ -3,7 +3,16 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.createStyledElementComponent = exports.stylify = exports.createStylableComponent = exports.stylable = exports.ThemeProvider = undefined;
+exports.createStyledElementComponent = exports.stylify = exports.createStylableComponent = exports.stylable = exports.ThemeProvider = exports.installLibraryMeta = undefined;
+
+var _defaultTheme = require('./default-theme');
+
+Object.defineProperty(exports, 'installLibraryMeta', {
+  enumerable: true,
+  get: function get() {
+    return _defaultTheme.installLibraryMeta;
+  }
+});
 
 var _stylable2 = require('./stylable');
 

@@ -59,7 +59,7 @@ var ThemeProvider = (_temp = _class = function (_Component) {
   function ThemeProvider(props, context) {
     _classCallCheck(this, ThemeProvider);
 
-    // do a deep merge with the default theme and the user's overrides. theming is
+    // do a deep merge with the library theme and the user's overrides. theming is
     // a one-shot deal; we do not currently support dynamic themes, although that
     // would be easy to add in the future.
     //
@@ -78,7 +78,7 @@ var ThemeProvider = (_temp = _class = function (_Component) {
       }, styleObj);
     };
 
-    _this.theme = (0, _merge3.default)({}, _defaultTheme2.default, props.theme);
+    _this.theme = (0, _merge3.default)({}, (0, _defaultTheme2.default)(), props.theme);
     _this.middlewares = props.middlewares || [];
     _this.installedComponents = [];
     return _this;

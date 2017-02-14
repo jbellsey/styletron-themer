@@ -1,6 +1,6 @@
 import React, {PropTypes, Component} from 'react';
 import _ from 'lodash';
-import defaultTheme from './default-theme';
+import getDefaultTheme from './default-theme';
 import * as availableMiddlewares from './middlewares';
 
 
@@ -29,11 +29,11 @@ export default class ThemeProvider extends Component {
   constructor(props, context) {
     super(props, context);
 
-    // do a deep merge with the default theme and the user's overrides. theming is
+    // do a deep merge with the library theme and the user's overrides. theming is
     // a one-shot deal; we do not currently support dynamic themes, although that
     // would be easy to add in the future.
     //
-    this.theme               = _.merge({}, defaultTheme, props.theme);
+    this.theme               = _.merge({}, getDefaultTheme(), props.theme);
     this.middlewares         = props.middlewares || [];
     this.installedComponents = [];
   }

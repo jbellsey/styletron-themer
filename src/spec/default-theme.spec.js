@@ -1,5 +1,5 @@
 import tape from 'blue-tape';
-import defaultTheme from '../default-theme';
+import getDefaultTheme from '../default-theme';
 
 const colorRegexes = {
   hexColor3 : /^#[a-f0-9]{3}$/i,
@@ -64,7 +64,7 @@ tape('our color validator regexes work properly', t => {
 
 tape('all colors in the default theme are legit', t => {
 
-  const colors = defaultTheme.meta.colors;
+  const colors = getDefaultTheme().meta.colors;
 
   Object.keys(colors).forEach(oneColor => {
     t.equal(true, isColorLegit(colors[oneColor]), `the color ${colors[oneColor]} should validate properly`);

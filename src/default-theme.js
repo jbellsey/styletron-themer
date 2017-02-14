@@ -1,6 +1,6 @@
+import _ from 'lodash';
 
-
-export default {
+const baseTheme = {
 
   // the default styles for each component are in the component's `styles.js` file.
   // meta can have whatever you like.
@@ -9,21 +9,11 @@ export default {
     colors: {
       // functional colors
       primary:   '#00c653',
-      secondary: '#0e93a7',
-      warning:   '#ef655b',
-      text:      '#313739',
-      disabled:  '#bbb',
 
-      // specific colors
+      // "what it says on the tin" named colors
       gray0: '#000',
-      gray2: '#313739',
-      gray4: '#464e52',
       gray6: '#666f74',
-      gray8: '#88959b',
-      grayA: '#a1adb1',
-      grayD: '#dae0e2',
-      grayE: '#e4eaed',
-      grayF: '#f6f8f9'
+      grayE: '#e4eaed'
     },
 
     // other shared constants
@@ -32,3 +22,13 @@ export default {
     }
   }
 };
+
+let libraryMeta = {};
+
+export function installLibraryMeta(t) {
+  libraryMeta = t;
+}
+
+export default function getDefaultTheme() {
+  return _.merge({}, baseTheme, {meta: libraryMeta});
+}
