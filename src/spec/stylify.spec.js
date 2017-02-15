@@ -9,7 +9,7 @@ import {installLibraryMeta} from '../default-theme';
 /*
   tests can peek into the style-maker, to track style properties (easy to assess correctness)
   instead of classes (impossible to interpret). this will only work for tracking the activities
-  inside the makeStyles() function. to track external factors (like middleware & inlineStyles),
+  inside the makeStyles() function. to track external factors (like middleware & inline styles),
   we'll need to look at the final generated CSS code. see below.
 */
 const styleWatcher = {
@@ -161,7 +161,7 @@ function runTestSuite(componentType) {
       t.equal(color,    'red',  'stylify should use style values from the theme when applicable');
     });
 
-    t.test(`stylify lets the user override default styles per component with inlineStyles (type: ${componentType})`, t => {
+    t.test(`stylify lets the user override default styles per component with inline styles (type: ${componentType})`, t => {
       let localStyletron = new Styletron(),
           customStyles = {
             fontSize: '88px',
@@ -169,7 +169,7 @@ function runTestSuite(componentType) {
             color:    'lime'
           };
 
-      mount(<ComponentUnderTest inlineStyles={customStyles} />, null, {styletron: localStyletron});
+      mount(<ComponentUnderTest style={customStyles} />, null, {styletron: localStyletron});
 
       const styles        = localStyletron.getCss(),
             shouldFind    = ['color:lime', 'font-size:88px', 'z-index:888'],
@@ -177,10 +177,10 @@ function runTestSuite(componentType) {
 
       t.plan(shouldFind.length + shouldNotFind.length);
       shouldFind.forEach(oneNeedle => {
-        t.equal(styles.indexOf(oneNeedle) >= 0, true, 'inlineStyles should be applied');
+        t.equal(styles.indexOf(oneNeedle) >= 0, true, 'inline styles should be applied');
       });
       shouldNotFind.forEach(oneAbsentNeedle => {
-        t.equal(styles.indexOf(oneAbsentNeedle) >= 0, false, 'inlineStyles should override base styles');
+        t.equal(styles.indexOf(oneAbsentNeedle) >= 0, false, 'inline styles should override base styles');
       });
     });
 
