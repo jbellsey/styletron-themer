@@ -13,7 +13,8 @@
     "lint:fix": "npm run lint -- --fix"
   },
   "pre-commit": [
-    "lint"
+    "lint",
+    "build"
   ],
   "repository": {
     "type": "git",

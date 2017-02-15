@@ -12,7 +12,7 @@ you're probably using Styltron to manage CSS in JavaScript.
 
 ## Documentation
 
-Full documentation can be found here: [TODO: gitbook link]
+[Full documentation can be found here](https://jbellsey.gitbooks.io/styletron-themer/).
 
 ## Sample component
 
@@ -29,9 +29,7 @@ const defaultComponentTheme = {
 
 // this function adapts your base styles to the props provided
 const dynamicStyles = ({componentTheme, props}) => {
-  return _.merge(
-    {},
-    componentTheme,
+  return _.merge({}, componentTheme,
     props.color && {color: props.color}
   );
 }
@@ -78,8 +76,8 @@ Each component's default styles can be overridden by your users. A
 component user can indicate that all Button components should have 
 `padding:10px` instead of `padding:8px`. (The theme is installed when 
 you instantiate your `ThemeProvider` component.)
- 
-A user can also manually override this value for any particular button:
+
+A user can also manually override styles for a single component instance:
 
 ```js
 // sometimes you just need a little breathing room
@@ -100,5 +98,26 @@ There are some unsurprising peer dependencies:
 * styletron-react
 * styletron-utils
 
-And while we use lodash in many of our samples, it is not required.
+## Building & testing
 
+The test suite can be run with one of two commands. The first
+(test:ci) runs the tests and exits; the second (test) enters
+watch mode.
+
+```bash
+npm run test:ci
+npm run test
+```
+
+The files in the `dist` directory are built and committed to git.
+They are generated with babel, using the following script:
+
+```bash
+npm run build
+```
+
+You can also run the linter (`npm run lint` or `npm run lint:fix`).
+
+In fact, both the linter and the build operation are run prior
+to any commit. If you try to commit but it seems to fail, check
+your console, as there are likely to be linting errors.

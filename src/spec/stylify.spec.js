@@ -4,6 +4,7 @@ import React from 'react';
 import Styletron from 'styletron-server';   // we use the server package here
 import {mount, getAttributesAsObject} from './spec-helpers/helpers';
 import stylify, {createStyledElementComponent} from '../stylify';
+import {installLibraryMeta} from '../default-theme';
 
 /*
   tests can peek into the style-maker, to track style properties (easy to assess correctness)
@@ -83,12 +84,22 @@ class TestDecorator extends React.Component {
 
 //------ end test setup
 
+const testSuites = {
+  hoc: {
+    Component: TestHoC,
+    name:      'TestComponent'
+  },
+  decorator: {
+    Component: TestDecorator,
+    name:      'TestDecorator'
+  }
+};
+
 // we run the entire test suite twice; once for HoC, once for the decorator
 //
-function runTestSuite(ComponentUnderTest, componentType) {
+function runTestSuite(componentType) {
 
-  // the theme is organized by component name
-  const componentName = (componentType === 'hoc' ? 'TestComponent' : 'TestDecorator');
+  const {Component: ComponentUnderTest, name: componentName} = testSuites[componentType];
 
   tape(t => {
 
@@ -200,6 +211,44 @@ function runTestSuite(ComponentUnderTest, componentType) {
       });
     });
 
+    t.test(`stylify lets the library install its own meta (type: ${componentType})`, t => {
+      let localStyletron = new Styletron(),
+          libraryMeta = {     // library meta should override the default styles
+            colors: {
+              // fake colors are easier to read
+              chilly: 'library-chilly',
+              sweaty: 'library-sweaty'
+            }
+          },
+          theme = {           // the user theme should override the library meta
+            meta: {
+              colors: {
+                chilly: 'usertheme-chilly'
+              }
+            },
+            [componentName]: {
+              borderColor:     'chilly',
+              backgroundColor: 'sweaty'
+            }
+          };
+
+      installLibraryMeta(libraryMeta);
+      mount(<ComponentUnderTest />, theme, {useMiddleware: true, styletron: localStyletron});
+      installLibraryMeta({});   // there is no automatic cleanup for this
+
+      const styles        = localStyletron.getCss(),
+            shouldFind    = ['border-color:usertheme-chilly', 'background-color:library-sweaty'],
+            shouldNotFind = ['border-color:library-chilly', 'background-color:usertheme-sweaty'];
+
+      t.plan(shouldFind.length + shouldNotFind.length);
+      shouldFind.forEach(oneNeedle => {
+        t.equal(styles.indexOf(oneNeedle) >= 0, true, 'library meta should be applied before the user theme');
+      });
+      shouldNotFind.forEach(oneAbsentNeedle => {
+        t.equal(styles.indexOf(oneAbsentNeedle) >= 0, false, 'user theme should override library meta');
+      });
+    });
+
     t.test(`stripProps cleans attribute list properly (type: ${componentType})`, t => {
       let component = (
             <ComponentUnderTest
@@ -229,5 +278,4 @@ function runTestSuite(ComponentUnderTest, componentType) {
   });
 }
 
-runTestSuite(TestDecorator, 'decorator');
-runTestSuite(TestHoC, 'hoc');
+Object.keys(testSuites).forEach(key => runTestSuite(key));
