@@ -173,7 +173,7 @@ function runTestSuite(componentType) {
 
       const styles        = localStyletron.getCss(),
             shouldFind    = ['color:lime', 'font-size:88px', 'z-index:888'],
-            shouldNotFind = ['font-size:3px', 'z-index:333'];
+            shouldNotFind = ['font-size:33px', 'z-index:333'];
 
       t.plan(shouldFind.length + shouldNotFind.length);
       shouldFind.forEach(oneNeedle => {
@@ -213,7 +213,7 @@ function runTestSuite(componentType) {
 
     t.test(`stylify lets the library install its own meta (type: ${componentType})`, t => {
       let localStyletron = new Styletron(),
-          libraryMeta = {     // library meta should override the default styles
+          libraryMeta = {     // library meta should override the default theme
             colors: {
               // fake colors are easier to read
               chilly: 'library-chilly',
@@ -266,7 +266,7 @@ function runTestSuite(componentType) {
       t.plan(6);
       t.equal(nonDataKeys.length, 2, 'should have exactly two attributes that are not data- attributes');
       t.equal(nonDataKeys.indexOf('class') >= 0, true, 'should have a class attribute (applied by styletron)');
-      t.equal(nonDataKeys.indexOf('id') >= 0, true, 'should have an ID attribute');
+      t.equal(nonDataKeys.indexOf('id') >= 0, true, 'should have an ID attribute (entered manually)');
 
       t.equal(attrs.id, 'spillover', 'should have the given ID');
       t.equal(attrs['data-philosophy'], 'nihilism', 'should have the given data attribute');

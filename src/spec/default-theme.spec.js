@@ -1,6 +1,11 @@
 import tape from 'blue-tape';
 import getDefaultTheme from '../default-theme';
 
+// Note: this test suite is quite overkill. but it can't hurt
+// to ensure that the default theme -- even though it's meant
+// to be overridden -- is well-constructed.
+//
+
 const colorRegexes = {
   hexColor3 : /^#[a-f0-9]{3}$/i,
   hexColor6 : /^#[a-f0-9]{6}$/i,

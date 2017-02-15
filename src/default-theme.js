@@ -10,7 +10,7 @@ const baseTheme = {
       // functional colors
       primary:   '#00c653',
 
-      // "what it says on the tin" named colors
+      // simply named colors
       gray0: '#000',
       gray6: '#666f74',
       grayE: '#e4eaed'
