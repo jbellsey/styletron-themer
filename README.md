@@ -74,12 +74,11 @@ In short:
 
 Each component's default styles can be overridden by your users. A 
 component user can indicate that all Button components should have 
-`padding:10px` instead of `padding:8px`. (The theme is installed when 
-you instantiate your `ThemeProvider` component.)
+`padding:10px` instead of `padding:8px`. 
 
 A user can also manually override styles for a single component instance.
 The use of `style` on a stylified component integrates with the Styletron
-classing system:
+classing system.
 
 ```js
 // sometimes you just need a little breathing room
@@ -97,7 +96,6 @@ There are some unsurprising peer dependencies:
 * react
 * react-dom
 * styletron
-* styletron-react
 * styletron-utils
 
 ## Building & testing
@@ -120,6 +118,5 @@ npm run build
 
 You can also run the linter (`npm run lint` or `npm run lint:fix`).
 
-In fact, both the linter and the build operation are run prior
-to any commit. If you try to commit but it seems to fail, check
+The linter is run prior to any commit. If you try to commit but it seems to fail, check
 your console, as there are likely to be linting errors.

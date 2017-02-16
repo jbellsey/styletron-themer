@@ -82,6 +82,14 @@ class TestDecorator extends React.Component {
   }
 }
 
+// one more as stateless functional component
+//
+function Stateless({className, stripProps}) {
+  const otherProps = stripProps(['size', 'layer']);
+  return <div className={className} {...otherProps}>Test</div>;
+}
+const TestStateless = stylify(defaultStyles, makeStyles)(Stateless);
+
 //------ end test setup
 
 const testSuites = {
@@ -92,6 +100,10 @@ const testSuites = {
   decorator: {
     Component: TestDecorator,
     name:      'TestDecorator'
+  },
+  stateless: {
+    Component: TestStateless,
+    name:      'Stateless'
   }
 };
 
@@ -104,9 +116,10 @@ function runTestSuite(componentType) {
   tape(t => {
 
     t.test(`stylify passes through custom attributes (type: ${componentType})`, t => {
-      let c = mount(<ComponentUnderTest id="test-id" />).getDOMNode();
-      t.plan(1);
+      let c = mount(<ComponentUnderTest id="test-id" data-peanut-butter="crunchy" />).getDOMNode();
+      t.plan(2);
       t.equal(c.getAttribute('id'), 'test-id', 'stylify should pass through id attribute');
+      t.equal(c.getAttribute('data-peanut-butter'), 'crunchy', 'stylify should pass through data attributes');
     });
 
     t.test(`stylify processes default styles without a theme (type: ${componentType})`, t => {
@@ -123,16 +136,16 @@ function runTestSuite(componentType) {
     t.test(`stylify adapts to props correctly (type: ${componentType})`, t => {
       let fontSize = null;
 
-      styleWatcher.start(allStyles => {fontSize = allStyles.fontSize;});
-      mount(<ComponentUnderTest size='small' />);
-
       t.plan(2);
+      styleWatcher.start(allStyles => {fontSize = allStyles.fontSize;});
+
+      mount(<ComponentUnderTest size='small' />);
       t.equal(fontSize, '11px', 'makeStyles function should adapt styles to props');
 
       mount(<ComponentUnderTest size='large' />);
-      styleWatcher.end();
-
       t.equal(fontSize, '55px', 'makeStyles function should adapt styles to props');
+
+      styleWatcher.end();
     });
 
     t.test(`stylify lets the user override default styles in the theme (type: ${componentType})`, t => {
@@ -234,7 +247,7 @@ function runTestSuite(componentType) {
 
       installLibraryMeta(libraryMeta);
       mount(<ComponentUnderTest />, theme, {useMiddleware: true, styletron: localStyletron});
-      installLibraryMeta({});   // there is no automatic cleanup for this
+      installLibraryMeta({});   // clean up (there is no automatic cleanup for this feature)
 
       const styles        = localStyletron.getCss(),
             shouldFind    = ['border-color:usertheme-chilly', 'background-color:library-sweaty'],
