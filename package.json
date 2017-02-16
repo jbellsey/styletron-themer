@@ -1,16 +1,21 @@
 {
   "name": "styletron-themer",
-  "version": "0.0.3",
-  "description": "UI component library for Gnosis applications",
+  "version": "0.8.0",
+  "description": "Themable component-building tool for Styletron & React",
+  "keywords": [
+    "Styletron",
+    "React",
+    "Components"
+  ],
   "main": "dist/index.js",
   "scripts": {
     "prebuild": "rm -rf dist/; mkdir dist;",
     "build": "babel src --ignore spec.js,spec-helpers/**.js --out-dir dist",
-    "postbuild": "git add ./dist",
     "test": "karma start",
     "test:ci": "TEST_ENV=ci karma start",
     "lint": "eslint .",
-    "lint:fix": "npm run lint -- --fix"
+    "lint:fix": "npm run lint -- --fix",
+    "prepublish": "npm run build"
   },
   "pre-commit": [
     "lint",
@@ -21,7 +26,7 @@
     "url": "https://source.corp.lookout.com/frontend/styletron-themer"
   },
   "author": "Jeff Bellsey",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "babel-cli": "^6.18.0",
     "babel-eslint": "^7.1.1",
@@ -59,7 +64,6 @@
     "react": "^15",
     "react-dom": "^15",
     "styletron": "^2.5",
-    "styletron-react": "^2.5.2",
     "styletron-utils": "^2.5"
   },
   "dependencies": {

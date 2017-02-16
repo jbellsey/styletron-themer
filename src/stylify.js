@@ -29,9 +29,9 @@ import {getDisplayName} from './utils';
  *| class MyComponent ...
  */
 
-//this is preferred over the HoC below.
+// this is preferred over the HoC below.
 export default function stylify(defaultStyle, makeStyles) {
-  return component => createStyledElementComponent(component, defaultStyle, makeStyles);
+  return component => createStyledComponent(component, defaultStyle, makeStyles);
 }
 
 // utility for components, so they can pass down props without littering. if you need
@@ -51,15 +51,19 @@ function stripProps(propsObject, propsToStrip) {
  * standard HoC:
  * @example
  * class MyComponent {...}
- * export createStyledElementComponent(MyComponent, {color: 'red'}, 'Button')
+ * export createStyledComponent(MyComponent, {color: 'red'}, 'Button')
  */
-export function createStyledElementComponent(CustomComponent, defaultStyle, makeStyles) {
+export function createStyledComponent(CustomComponent, defaultStyle, makeStyles) {
 
   class StyledComponent extends Component {
 
     // we pull context from above
     static contextTypes = {
-      styletron:        PropTypes.object,
+
+      // from StyletronProvider (see styletron-react)
+      styletron:        PropTypes.object.isRequired,
+
+      // from ThemeProvider
       theme:            PropTypes.object.isRequired,
       installComponent: PropTypes.func.isRequired,
       applyMiddleware:  PropTypes.func.isRequired
@@ -140,7 +144,7 @@ export function createStyledElementComponent(CustomComponent, defaultStyle, make
           className      = {(className ? className + ' ' : '') + styletronClasses}
 
           // use this utility method if you need to pass {...rest} down the chain. see comments above
-          stripProps     = {stripProps}
+          stripProps     = {stripProps.bind(null, this.props)}
 
           // the base theme of your component
           componentTheme = {theme[getDisplayName(CustomComponent)]}

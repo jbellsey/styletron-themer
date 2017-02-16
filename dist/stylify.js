@@ -17,7 +17,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 exports.default = stylify;
-exports.createStyledElementComponent = createStyledElementComponent;
+exports.createStyledComponent = createStyledComponent;
 
 var _react = require('react');
 
@@ -62,10 +62,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
  *| class MyComponent ...
  */
 
-//this is preferred over the HoC below.
+// this is preferred over the HoC below.
 function stylify(defaultStyle, makeStyles) {
   return function (component) {
-    return createStyledElementComponent(component, defaultStyle, makeStyles);
+    return createStyledComponent(component, defaultStyle, makeStyles);
   };
 }
 
@@ -82,9 +82,9 @@ function stripProps(propsObject, propsToStrip) {
  * standard HoC:
  * @example
  * class MyComponent {...}
- * export createStyledElementComponent(MyComponent, {color: 'red'}, 'Button')
+ * export createStyledComponent(MyComponent, {color: 'red'}, 'Button')
  */
-function createStyledElementComponent(CustomComponent, defaultStyle, makeStyles) {
+function createStyledComponent(CustomComponent, defaultStyle, makeStyles) {
   var _class, _temp;
 
   var StyledComponent = (_temp = _class = function (_Component) {
@@ -172,7 +172,7 @@ function createStyledElementComponent(CustomComponent, defaultStyle, makeStyles)
         , _extends({ className: (className ? className + ' ' : '') + styletronClasses
 
           // use this utility method if you need to pass {...rest} down the chain. see comments above
-          , stripProps: stripProps
+          , stripProps: stripProps.bind(null, this.props)
 
           // the base theme of your component
           , componentTheme: theme[(0, _utils.getDisplayName)(CustomComponent)]
@@ -191,7 +191,11 @@ function createStyledElementComponent(CustomComponent, defaultStyle, makeStyles)
 
     return StyledComponent;
   }(_react.Component), _class.contextTypes = {
-    styletron: _react.PropTypes.object,
+
+    // from StyletronProvider (see styletron-react)
+    styletron: _react.PropTypes.object.isRequired,
+
+    // from ThemeProvider
     theme: _react.PropTypes.object.isRequired,
     installComponent: _react.PropTypes.func.isRequired,
     applyMiddleware: _react.PropTypes.func.isRequired
