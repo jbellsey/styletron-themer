@@ -97,7 +97,11 @@ function createStylableComponent(CustomComponent) {
 
     return StylableComponent;
   }(_react.Component), _class.contextTypes = {
+
+    // from StyletronProvider (see styletron-react)
     styletron: _react.PropTypes.object.isRequired,
+
+    // from ThemeProvider
     applyMiddleware: _react.PropTypes.func.isRequired
   }, _class.displayName = 'Stylable_' + (0, _utils.getDisplayName)(CustomComponent), _temp2);
 

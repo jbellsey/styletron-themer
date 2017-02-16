@@ -3,7 +3,7 @@ import _ from 'lodash';
 import React from 'react';
 import Styletron from 'styletron-server';   // we use the server package here
 import {mount, getAttributesAsObject} from './spec-helpers/helpers';
-import stylify, {createStyledElementComponent} from '../stylify';
+import stylify, {createStyledComponent} from '../stylify';
 import {installLibraryMeta} from '../default-theme';
 
 /*
@@ -61,14 +61,14 @@ class TestComponent extends React.Component {
   static propTypes = ourPropTypes;
   render() {
     const {className, stripProps} = this.props,
-          otherProps = stripProps(this.props, ['size', 'layer']);
+          otherProps = stripProps(['size', 'layer']);
     return <div className={className} {...otherProps}>Test</div>;
   }
 }
 
 // one test component with the higher-order component
 //
-const TestHoC = createStyledElementComponent(TestComponent, defaultStyles, makeStyles);
+const TestHoC = createStyledComponent(TestComponent, defaultStyles, makeStyles);
 
 // and another component with the decorator
 //
@@ -77,7 +77,7 @@ class TestDecorator extends React.Component {
   static propTypes = ourPropTypes;
   render() {
     const {className, stripProps} = this.props,
-          otherProps = stripProps(this.props, ['size', 'layer']);
+          otherProps = stripProps(['size', 'layer']);
     return <div className={className} {...otherProps}>Test</div>;
   }
 }

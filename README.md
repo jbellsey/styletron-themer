@@ -77,11 +77,13 @@ component user can indicate that all Button components should have
 `padding:10px` instead of `padding:8px`. (The theme is installed when 
 you instantiate your `ThemeProvider` component.)
 
-A user can also manually override styles for a single component instance:
+A user can also manually override styles for a single component instance.
+The use of `style` on a stylified component integrates with the Styletron
+classing system:
 
 ```js
 // sometimes you just need a little breathing room
-const b = <Button inlineStyles={{marginRight:'12px'}}>Click me</Button>;
+const b = <Button style={{marginRight:'12px'}}>Click me</Button>;
 ```
 
 

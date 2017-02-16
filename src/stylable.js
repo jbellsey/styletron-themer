@@ -33,7 +33,11 @@ export function createStylableComponent(CustomComponent) {
 
     // we pull context from above
     static contextTypes = {
+
+      // from StyletronProvider (see styletron-react)
       styletron:       PropTypes.object.isRequired,
+
+      // from ThemeProvider
       applyMiddleware: PropTypes.func.isRequired
     };
     static displayName = `Stylable_${getDisplayName(CustomComponent)}`;
