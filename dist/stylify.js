@@ -75,7 +75,7 @@ function stylify(defaultStyle, makeStyles) {
 // this function is passed down as a prop to all components.
 //
 function stripProps(propsObject, propsToStrip) {
-  return (0, _omit3.default)(propsObject, ['children', 'className', 'style', 'stripProps', 'componentTheme', 'globalMeta'], propsToStrip);
+  return (0, _omit3.default)(propsObject, ['children', 'className', 'style', 'stripProps', 'componentTheme', 'globalMeta', 'injectStyles'], propsToStrip);
 }
 
 /*
@@ -172,7 +172,7 @@ function createStyledComponent(CustomComponent, defaultStyle, makeStyles) {
         , _extends({ className: (className ? className + ' ' : '') + styletronClasses
 
           // use this utility method if you need to pass {...rest} down the chain. see comments above
-          , stripProps: stripProps.bind(null, this.props)
+          , stripProps: stripProps
 
           // the base theme of your component
           , componentTheme: theme[(0, _utils.getDisplayName)(CustomComponent)]

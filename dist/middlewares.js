@@ -14,6 +14,11 @@ var _utils = require('./utils');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+/*
+  this module doesn't provide generic tools for middleware management.
+  it simply provides a single middleware tool for color mapping.
+*/
+
 function isKeyColorRelated(key) {
 
   // we need to trap both "color" and "Color". no need to lowercase;
@@ -26,33 +31,51 @@ function isKeyColorRelated(key) {
   return key === 'stroke' || key === 'fill';
 }
 
+// the heavy lifting is done here. this function doesn't know anything about
+// colors; the callbacks make this very reusable
+//
+function styleDive(theme, styles, keyTester, valueMapper) {
+
+  var clonedRoot = false,
+      cloneNow = function cloneNow() {
+    if (!clonedRoot) styles = (0, _merge3.default)({}, styles);
+    clonedRoot = true;
+  };
+
+  Object.keys(styles).forEach(function (key) {
+
+    if ((0, _utils.isObject)(styles[key])) {
+      var _styleDive = styleDive(theme, styles[key], keyTester, valueMapper),
+          clonedChild = _styleDive.cloned,
+          childStyles = _styleDive.styles;
+
+      if (clonedChild) cloneNow();
+      styles[key] = childStyles;
+    } else if (keyTester(key)) {
+
+      var originalValue = styles[key],
+          mappedValue = valueMapper(originalValue);
+
+      if (mappedValue !== undefined) {
+        cloneNow();
+        styles[key] = mappedValue;
+      }
+    }
+  });
+
+  return {
+    styles: styles,
+    cloned: clonedRoot
+  };
+}
+
 // a convenience function that does key-based lookups into the global meta.
 // if you use a key like "primary" or "blueGray" in any color-related style
 // attribute, it will be converted to a CSS string. otherwise, your input is
 // returned untouched.
 //
 function mapColorKeys(theme, styles) {
-
-  var cloned = false;
-
-  Object.keys(styles).forEach(function (key) {
-
-    if ((0, _utils.isObject)(styles[key])) {
-      styles[key] = mapColorKeys(theme, styles[key]);
-    } else if (isKeyColorRelated(key)) {
-
-      var col = styles[key],
-          mappedColor = theme.meta.colors[col];
-
-      if (mappedColor !== undefined) {
-        if (!cloned) {
-          styles = (0, _merge3.default)({}, styles);
-          cloned = true;
-        }
-        styles[key] = mappedColor;
-      }
-    }
-  });
-
-  return styles;
+  return styleDive(theme, styles, isKeyColorRelated, function (color) {
+    return theme.meta.colors[color];
+  }).styles;
 }

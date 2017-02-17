@@ -61,7 +61,7 @@ class TestComponent extends React.Component {
   static propTypes = ourPropTypes;
   render() {
     const {className, stripProps} = this.props,
-          otherProps = stripProps(['size', 'layer']);
+          otherProps = stripProps(this.props, ['size', 'layer']);
     return <div className={className} {...otherProps}>Test</div>;
   }
 }
@@ -77,7 +77,7 @@ class TestDecorator extends React.Component {
   static propTypes = ourPropTypes;
   render() {
     const {className, stripProps} = this.props,
-          otherProps = stripProps(['size', 'layer']);
+          otherProps = stripProps(this.props, ['size', 'layer']);
     return <div className={className} {...otherProps}>Test</div>;
   }
 }
@@ -85,7 +85,7 @@ class TestDecorator extends React.Component {
 // one more as stateless functional component
 //
 function Stateless({className, stripProps}) {
-  const otherProps = stripProps(['size', 'layer']);
+  const otherProps = stripProps(this.props, ['size', 'layer']);
   return <div className={className} {...otherProps}>Test</div>;
 }
 const TestStateless = stylify(defaultStyles, makeStyles)(Stateless);
@@ -107,7 +107,7 @@ const testSuites = {
   }
 };
 
-// we run the entire test suite twice; once for HoC, once for the decorator
+// we run the entire test suite multiple times
 //
 function runTestSuite(componentType) {
 
