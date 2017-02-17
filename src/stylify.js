@@ -42,7 +42,7 @@ export default function stylify(defaultStyle, makeStyles) {
 function stripProps(propsObject, propsToStrip) {
   return _.omit(
     propsObject,
-    ['children', 'className', 'style', 'stripProps', 'componentTheme', 'globalMeta'],
+    ['children', 'className', 'style', 'stripProps', 'componentTheme', 'globalMeta', 'injectStyles'],
     propsToStrip
   );
 }
@@ -144,7 +144,7 @@ export function createStyledComponent(CustomComponent, defaultStyle, makeStyles)
           className      = {(className ? className + ' ' : '') + styletronClasses}
 
           // use this utility method if you need to pass {...rest} down the chain. see comments above
-          stripProps     = {stripProps.bind(null, this.props)}
+          stripProps     = {stripProps}
 
           // the base theme of your component
           componentTheme = {theme[getDisplayName(CustomComponent)]}
