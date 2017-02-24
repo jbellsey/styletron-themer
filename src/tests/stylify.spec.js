@@ -111,7 +111,10 @@ const testSuites = {
 //
 function runTestSuite(componentType) {
 
-  const {Component: ComponentUnderTest, name: componentName} = testSuites[componentType];
+  const {
+    Component: ComponentUnderTest,
+    name:      componentName
+  } = testSuites[componentType];
 
   tape(t => {
 
@@ -226,20 +229,19 @@ function runTestSuite(componentType) {
 
     t.test(`stylify lets the library install its own meta (type: ${componentType})`, t => {
       let localStyletron = new Styletron(),
-          libraryMeta = {     // library meta should override the default theme
+          libraryMeta = {     // library meta overrides the default theme
             colors: {
-              // fake colors are easier to read
               chilly: 'library-chilly',
               sweaty: 'library-sweaty'
             }
           },
-          theme = {           // the user theme should override the library meta
+          theme = {           // the user theme overrides the library meta when there are collisions
             meta: {
               colors: {
                 chilly: 'usertheme-chilly'
               }
             },
-            [componentName]: {
+            [componentName]: {  // default theme
               borderColor:     'chilly',
               backgroundColor: 'sweaty'
             }
@@ -247,7 +249,7 @@ function runTestSuite(componentType) {
 
       installLibraryMeta(libraryMeta);
       mount(<ComponentUnderTest />, theme, {useMiddleware: true, styletron: localStyletron});
-      installLibraryMeta({});   // clean up (there is no automatic cleanup for this feature)
+      installLibraryMeta({});   // (there is no automatic cleanup for this feature)
 
       const styles        = localStyletron.getCss(),
             shouldFind    = ['border-color:usertheme-chilly', 'background-color:library-sweaty'],

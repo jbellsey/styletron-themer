@@ -57,6 +57,9 @@ export default class ThemeProvider extends Component {
       );
   }
 
+  // TODO: add a componentWillReceiveProps hook, which will allow the user to
+  // change the theme on the fly
+
   render() {
     return React.Children.only(this.props.children);
   }
