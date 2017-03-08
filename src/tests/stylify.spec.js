@@ -84,11 +84,36 @@ class TestDecorator extends React.Component {
 
 // one more as stateless functional component
 //
-function Stateless({className, stripProps}) {
-  const otherProps = stripProps(this.props, ['size', 'layer']);
+function Stateless(props) {
+  const {className, stripProps} = props,
+        otherProps = stripProps(props, ['size', 'layer']);
   return <div className={className} {...otherProps}>Test</div>;
 }
 const TestStateless = stylify(defaultStyles, makeStyles)(Stateless);
+
+
+import Stylified from '../stylify-function';
+
+class TestFunctionComponent extends React.Component {
+  static propTypes = ourPropTypes;
+  render() {
+    return (
+      <Stylified
+        name         = {this.constructor.name}
+        defaultStyle = {defaultStyles}
+        makeStyles   = {makeStyles}
+        {...this.props}
+      >
+        {newProps => {
+          let {className} = newProps;
+          return <div className={className} {...this.props}>Test</div>;
+        }}
+      </Stylified>
+    );
+  }
+}
+
+
 
 //------ end test setup
 
@@ -104,6 +129,10 @@ const testSuites = {
   stateless: {
     Component: TestStateless,
     name:      'Stateless'
+  },
+  func: {
+    Component: TestFunctionComponent,
+    name:      'TestFunctionComponent'
   }
 };
 

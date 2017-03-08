@@ -92,6 +92,11 @@ var ThemeProvider = (_temp = _class = function (_Component) {
 
   _createClass(ThemeProvider, [{
     key: 'render',
+
+
+    // TODO: add a componentWillReceiveProps hook, which will allow the user to
+    // change the theme on the fly
+
     value: function render() {
       return _react2.default.Children.only(this.props.children);
     }

@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.installLibraryMeta = exports.ThemeProvider = exports.createStyledComponent = exports.stylify = exports.createStylableComponent = exports.stylable = undefined;
+exports.installLibraryMeta = exports.ThemeProvider = exports.Stylified = exports.createStyledComponent = exports.stylify = exports.createStylableComponent = exports.stylable = undefined;
 
 var _stylable2 = require('./stylable');
 
@@ -36,6 +36,10 @@ var _stylable3 = _interopRequireDefault(_stylable2);
 
 var _stylify3 = _interopRequireDefault(_stylify2);
 
+var _stylifyFunction = require('./stylify-function');
+
+var _stylifyFunction2 = _interopRequireDefault(_stylifyFunction);
+
 var _themeProvider = require('./theme-provider');
 
 var _themeProvider2 = _interopRequireDefault(_themeProvider);
@@ -44,4 +48,5 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.stylable = _stylable3.default;
 exports.stylify = _stylify3.default;
+exports.Stylified = _stylifyFunction2.default;
 exports.ThemeProvider = _themeProvider2.default;
