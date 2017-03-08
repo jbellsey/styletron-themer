@@ -16,7 +16,6 @@ class Stylified extends Component {
     installComponent: PropTypes.func.isRequired,
     applyMiddleware:  PropTypes.func.isRequired
   };
-  // static displayName = `Styled_${getDisplayName(CustomComponent)}`;
 
   /*
    every stylified component can take two props which allow you to override
@@ -46,8 +45,10 @@ class Stylified extends Component {
       // TODO: throw or console.error
     }
 
+    this.componentName = props.name;
+
     // ensure that the component's default styles are inserted into the master theme
-    context.installComponent(this.componentName = props.name, props.defaultStyle);
+    context.installComponent(props.name, props.defaultStyle);
   }
 
   // this is where the magic happens. here we figure out what styles need to be applied
