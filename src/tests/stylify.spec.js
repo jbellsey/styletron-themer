@@ -113,6 +113,24 @@ class TestFunctionComponent extends React.Component {
   }
 }
 
+// this component uses the render function, but does not tell us its name.
+// that's fine, but it prevents the component from being registered for theming
+//
+class TestUnnamedFunctionComponent extends React.Component {
+  static propTypes = ourPropTypes;
+  render() {
+    return (
+      <Stylified
+        defaultStyle = {defaultStyles}
+        makeStyles   = {makeStyles}
+        {...this.props}
+      >
+        {({className}) => <div className={className} {...this.props}>Test</div>}
+      </Stylified>
+    );
+  }
+}
+
 
 
 //------ end test setup
@@ -133,6 +151,9 @@ const testSuites = {
   func: {
     Component: TestFunctionComponent,
     name:      'TestFunctionComponent'
+  },
+  unnamed: {
+    Component: TestUnnamedFunctionComponent
   }
 };
 
@@ -180,31 +201,98 @@ function runTestSuite(componentType) {
       styleWatcher.end();
     });
 
-    t.test(`stylify lets the user override default styles in the theme (type: ${componentType})`, t => {
-      let fontSize = null,
-          zIndex   = null,
-          color    = null,
-          theme = {
-            [componentName]: {
-              fontSize: '99px',
-              zIndex:   '999',
-              color:    'red'     // a new property, not in the component
-            }
-          };
+    // these tests do not apply to unnamed components
+    if (componentName) {
+      t.test(`stylify lets the user override default styles in the theme (type: ${componentType})`, t => {
+        let fontSize = null,
+            zIndex   = null,
+            color    = null,
+            theme = {
+              [componentName]: {
+                fontSize: '99px',
+                zIndex:   '999',
+                color:    'red'     // a new property, not in the component
+              }
+            };
 
-      styleWatcher.start(allStyles => {
-        fontSize = allStyles.fontSize;
-        zIndex   = allStyles.zIndex;
-        color    = allStyles.color;
+        styleWatcher.start(allStyles => {
+          fontSize = allStyles.fontSize;
+          zIndex   = allStyles.zIndex;
+          color    = allStyles.color;
+        });
+        mount(<ComponentUnderTest />, theme);
+        styleWatcher.end();
+
+        t.plan(3);
+        t.equal(fontSize, '99px', 'stylify should use style values from the theme when applicable');
+        t.equal(zIndex,   '999',  'stylify should use style values from the theme when applicable');
+        t.equal(color,    'red',  'stylify should use style values from the theme when applicable');
       });
-      mount(<ComponentUnderTest />, theme);
-      styleWatcher.end();
 
-      t.plan(3);
-      t.equal(fontSize, '99px', 'stylify should use style values from the theme when applicable');
-      t.equal(zIndex,   '999',  'stylify should use style values from the theme when applicable');
-      t.equal(color,    'red',  'stylify should use style values from the theme when applicable');
-    });
+      t.test(`stylify applies middleware correctly (type: ${componentType})`, t => {
+        let localStyletron = new Styletron(),
+            theme = {
+              meta: {
+                colors: {
+                  // custom named colors
+                  'crunchy':  '#654321',
+                  'kool-aid': 'rgba(44,33,22,0.11)'
+                }
+              },
+              [componentName]: {
+                borderColor:     'crunchy',
+                backgroundColor: 'kool-aid'
+              }
+            };
+
+        mount(<ComponentUnderTest />, theme, {useMiddleware: true, styletron: localStyletron});
+
+        const styles     = localStyletron.getCss(),
+              shouldFind = ['border-color:#654321', 'background-color:rgba(44,33,22,0.11)'];
+
+        t.plan(shouldFind.length);
+        shouldFind.forEach(oneNeedle => {
+          t.equal(styles.indexOf(oneNeedle) >= 0, true, 'middleware should be applied');
+        });
+      });
+
+      t.test(`stylify lets the library install its own meta (type: ${componentType})`, t => {
+        let localStyletron = new Styletron(),
+            libraryMeta = {     // library meta overrides the default theme
+              colors: {
+                chilly: 'library-chilly',
+                sweaty: 'library-sweaty'
+              }
+            },
+            theme = {           // the user theme overrides the library meta when there are collisions
+              meta: {
+                colors: {
+                  chilly: 'usertheme-chilly'
+                }
+              },
+              [componentName]: {  // default theme
+                borderColor:     'chilly',
+                backgroundColor: 'sweaty'
+              }
+            };
+
+        installLibraryMeta(libraryMeta);
+        mount(<ComponentUnderTest />, theme, {useMiddleware: true, styletron: localStyletron});
+        installLibraryMeta({});   // (there is no automatic cleanup for this feature)
+
+        const styles        = localStyletron.getCss(),
+              shouldFind    = ['border-color:usertheme-chilly', 'background-color:library-sweaty'],
+              shouldNotFind = ['border-color:library-chilly', 'background-color:usertheme-sweaty'];
+
+        t.plan(shouldFind.length + shouldNotFind.length);
+        shouldFind.forEach(oneNeedle => {
+          t.equal(styles.indexOf(oneNeedle) >= 0, true, 'library meta should be applied before the user theme');
+        });
+        shouldNotFind.forEach(oneAbsentNeedle => {
+          t.equal(styles.indexOf(oneAbsentNeedle) >= 0, false, 'user theme should override library meta');
+        });
+      });
+    }
 
     t.test(`stylify lets the user override default styles per component with inline styles (type: ${componentType})`, t => {
       let localStyletron = new Styletron(),
@@ -226,70 +314,6 @@ function runTestSuite(componentType) {
       });
       shouldNotFind.forEach(oneAbsentNeedle => {
         t.equal(styles.indexOf(oneAbsentNeedle) >= 0, false, 'inline styles should override base styles');
-      });
-    });
-
-    t.test(`stylify applies middleware correctly (type: ${componentType})`, t => {
-      let localStyletron = new Styletron(),
-          theme = {
-            meta: {
-              colors: {
-                // custom named colors
-                'crunchy':  '#654321',
-                'kool-aid': 'rgba(44,33,22,0.11)'
-              }
-            },
-            [componentName]: {
-              borderColor:     'crunchy',
-              backgroundColor: 'kool-aid'
-            }
-          };
-
-      mount(<ComponentUnderTest />, theme, {useMiddleware: true, styletron: localStyletron});
-
-      const styles     = localStyletron.getCss(),
-            shouldFind = ['border-color:#654321', 'background-color:rgba(44,33,22,0.11)'];
-
-      t.plan(shouldFind.length);
-      shouldFind.forEach(oneNeedle => {
-        t.equal(styles.indexOf(oneNeedle) >= 0, true, 'middleware should be applied');
-      });
-    });
-
-    t.test(`stylify lets the library install its own meta (type: ${componentType})`, t => {
-      let localStyletron = new Styletron(),
-          libraryMeta = {     // library meta overrides the default theme
-            colors: {
-              chilly: 'library-chilly',
-              sweaty: 'library-sweaty'
-            }
-          },
-          theme = {           // the user theme overrides the library meta when there are collisions
-            meta: {
-              colors: {
-                chilly: 'usertheme-chilly'
-              }
-            },
-            [componentName]: {  // default theme
-              borderColor:     'chilly',
-              backgroundColor: 'sweaty'
-            }
-          };
-
-      installLibraryMeta(libraryMeta);
-      mount(<ComponentUnderTest />, theme, {useMiddleware: true, styletron: localStyletron});
-      installLibraryMeta({});   // (there is no automatic cleanup for this feature)
-
-      const styles        = localStyletron.getCss(),
-            shouldFind    = ['border-color:usertheme-chilly', 'background-color:library-sweaty'],
-            shouldNotFind = ['border-color:library-chilly', 'background-color:usertheme-sweaty'];
-
-      t.plan(shouldFind.length + shouldNotFind.length);
-      shouldFind.forEach(oneNeedle => {
-        t.equal(styles.indexOf(oneNeedle) >= 0, true, 'library meta should be applied before the user theme');
-      });
-      shouldNotFind.forEach(oneAbsentNeedle => {
-        t.equal(styles.indexOf(oneAbsentNeedle) >= 0, false, 'user theme should override library meta');
       });
     });
 
@@ -323,3 +347,8 @@ function runTestSuite(componentType) {
 }
 
 Object.keys(testSuites).forEach(key => runTestSuite(key));
+
+// special test for the unnamed function component. i.e., this component uses the render-function
+// component, but it doesn't tell us its name. this should work fine, but the component's styles
+// are not added to the theme for overriding
+//

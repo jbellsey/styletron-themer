@@ -105,12 +105,12 @@ function createStyledComponent(CustomComponent, defaultStyle, makeStyles) {
 
       var _this = _possibleConstructorReturn(this, (StyledComponent.__proto__ || Object.getPrototypeOf(StyledComponent)).call(this, props, context));
 
-      if (!context.installComponent) {}
+      if (!context.themeProvider) {}
       // TODO: throw or console.error
 
 
       // ensure that the component's default styles are inserted into the master theme
-      context.installComponent((0, _utils.getDisplayName)(CustomComponent), defaultStyle);
+      context.themeProvider.installComponent((0, _utils.getDisplayName)(CustomComponent), defaultStyle);
       return _this;
     }
 
@@ -139,7 +139,7 @@ function createStyledComponent(CustomComponent, defaultStyle, makeStyles) {
       key: 'getStyle',
       value: function getStyle() {
         var // the theme is stored on context. this is our default theme, plus the user's overrides
-        masterTheme = this.context.theme,
+        masterTheme = this.context.themeProvider.theme,
 
 
         // the theme for this component only. the fallback was used when we didn't require
@@ -173,7 +173,7 @@ function createStyledComponent(CustomComponent, defaultStyle, makeStyles) {
         styleObj = (0, _merge3.default)({}, styleObj, this.props.style);
 
         // lastly, middleware
-        return this.context.applyMiddleware(styleObj);
+        return this.context.themeProvider.applyMiddleware(styleObj);
       }
     }, {
       key: 'render',
@@ -184,7 +184,7 @@ function createStyledComponent(CustomComponent, defaultStyle, makeStyles) {
             otherProps = _objectWithoutProperties(_props, ['className']),
             _context = this.context,
             styletron = _context.styletron,
-            theme = _context.theme,
+            theme = _context.themeProvider.theme,
             styletronClasses = (0, _styletronUtils.injectStylePrefixed)(styletron, styleProperties);
 
         /*
@@ -220,9 +220,11 @@ function createStyledComponent(CustomComponent, defaultStyle, makeStyles) {
     styletron: _react.PropTypes.object.isRequired,
 
     // from ThemeProvider
-    theme: _react.PropTypes.object.isRequired,
-    installComponent: _react.PropTypes.func.isRequired,
-    applyMiddleware: _react.PropTypes.func.isRequired
+    themeProvider: _react.PropTypes.shape({
+      theme: _react.PropTypes.object.isRequired,
+      installComponent: _react.PropTypes.func.isRequired,
+      applyMiddleware: _react.PropTypes.func.isRequired
+    }).isRequired
   }, _class.displayName = 'Styled_' + (0, _utils.getDisplayName)(CustomComponent), _class.propTypes = {
     className: _react.PropTypes.string,
     style: _react.PropTypes.object,

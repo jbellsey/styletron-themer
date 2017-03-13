@@ -24,6 +24,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var unnamedCounter = 0;
+
 var Stylified = (_temp = _class = function (_Component) {
   _inherits(Stylified, _Component);
 
@@ -33,14 +35,16 @@ var Stylified = (_temp = _class = function (_Component) {
 
     var _this = _possibleConstructorReturn(this, (Stylified.__proto__ || Object.getPrototypeOf(Stylified)).call(this, props, context));
 
-    if (!context.installComponent) {
+    if (!context.themeProvider) {
       // TODO: throw or console.error
     }
 
     _this.componentName = props.name;
 
-    // ensure that the component's default styles are inserted into the master theme
-    context.installComponent(props.name, props.defaultStyle);
+    // ensure that the component's default styles are inserted into the master theme.
+    // unnamed components are not installed into the theme
+    //
+    if (_this.componentName) context.themeProvider.installComponent(props.name, props.defaultStyle);else _this.componentName = 'Unnamd_' + unnamedCounter++; // guaranteed to not be a legit component name in the theme
     return _this;
   }
 
@@ -66,7 +70,7 @@ var Stylified = (_temp = _class = function (_Component) {
     key: 'getStyle',
     value: function getStyle() {
       var // the theme is stored on context. this is our default theme, plus the user's overrides
-      masterTheme = this.context.theme,
+      masterTheme = this.context.themeProvider.theme,
 
 
       // the theme for this component only. the fallback was used when we didn't require
@@ -100,7 +104,7 @@ var Stylified = (_temp = _class = function (_Component) {
       styleObj = (0, _merge3.default)({}, styleObj, this.props.style);
 
       // lastly, middleware
-      return this.context.applyMiddleware(styleObj);
+      return this.context.themeProvider.applyMiddleware(styleObj);
     }
   }, {
     key: 'render',
@@ -111,7 +115,7 @@ var Stylified = (_temp = _class = function (_Component) {
           children = _props.children,
           _context = this.context,
           styletron = _context.styletron,
-          theme = _context.theme,
+          theme = _context.themeProvider.theme,
           styletronClasses = (0, _styletronUtils.injectStylePrefixed)(styletron, styleProperties);
 
       /*
@@ -142,9 +146,11 @@ var Stylified = (_temp = _class = function (_Component) {
   styletron: _react.PropTypes.object.isRequired,
 
   // from ThemeProvider
-  theme: _react.PropTypes.object.isRequired,
-  installComponent: _react.PropTypes.func.isRequired,
-  applyMiddleware: _react.PropTypes.func.isRequired
+  themeProvider: _react.PropTypes.shape({
+    theme: _react.PropTypes.object.isRequired,
+    installComponent: _react.PropTypes.func.isRequired,
+    applyMiddleware: _react.PropTypes.func.isRequired
+  })
 }, _class.propTypes = {
   name: _react.PropTypes.string.isRequired,
   defaultStyle: _react.PropTypes.object,

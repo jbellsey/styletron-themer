@@ -11,18 +11,22 @@ export default class ThemeProvider extends Component {
 
   // pass these down on context
   static childContextTypes = {
-    theme:            PropTypes.object.isRequired,
-    middlewares:      PropTypes.array,
-    installComponent: PropTypes.func,
-    applyMiddleware:  PropTypes.func
+    themeProvider: {
+      theme:            PropTypes.object.isRequired,
+      middlewares:      PropTypes.array,
+      installComponent: PropTypes.func,
+      applyMiddleware:  PropTypes.func
+    }
   };
 
   getChildContext() {
     return {
-      theme:            this.theme,
-      middlewares:      this.middlewares,
-      installComponent: this.installComponent,
-      applyMiddleware:  this.applyMiddleware
+      themeProvider: {
+        theme:            this.theme,
+        middlewares:      this.middlewares,
+        installComponent: this.installComponent,
+        applyMiddleware:  this.applyMiddleware
+      }
     };
   }
 

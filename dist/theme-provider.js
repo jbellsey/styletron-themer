@@ -45,10 +45,12 @@ var ThemeProvider = (_temp = _class = function (_Component) {
     key: 'getChildContext',
     value: function getChildContext() {
       return {
-        theme: this.theme,
-        middlewares: this.middlewares,
-        installComponent: this.installComponent,
-        applyMiddleware: this.applyMiddleware
+        themeProvider: {
+          theme: this.theme,
+          middlewares: this.middlewares,
+          installComponent: this.installComponent,
+          applyMiddleware: this.applyMiddleware
+        }
       };
     }
 
@@ -104,10 +106,12 @@ var ThemeProvider = (_temp = _class = function (_Component) {
 
   return ThemeProvider;
 }(_react.Component), _class.childContextTypes = {
-  theme: _react.PropTypes.object.isRequired,
-  middlewares: _react.PropTypes.array,
-  installComponent: _react.PropTypes.func,
-  applyMiddleware: _react.PropTypes.func
+  themeProvider: {
+    theme: _react.PropTypes.object.isRequired,
+    middlewares: _react.PropTypes.array,
+    installComponent: _react.PropTypes.func,
+    applyMiddleware: _react.PropTypes.func
+  }
 }, _temp);
 
 /**
