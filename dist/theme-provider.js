@@ -106,12 +106,12 @@ var ThemeProvider = (_temp = _class = function (_Component) {
 
   return ThemeProvider;
 }(_react.Component), _class.childContextTypes = {
-  themeProvider: {
+  themeProvider: _react.PropTypes.shape({
     theme: _react.PropTypes.object.isRequired,
     middlewares: _react.PropTypes.array,
     installComponent: _react.PropTypes.func,
     applyMiddleware: _react.PropTypes.func
-  }
+  })
 }, _temp);
 
 /**

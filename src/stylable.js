@@ -38,9 +38,9 @@ export function createStylableComponent(CustomComponent) {
       styletron:       PropTypes.object.isRequired,
 
       // from ThemeProvider
-      themeProvider: {
+      themeProvider: PropTypes.shape({
         applyMiddleware: PropTypes.func.isRequired
-      }
+      })
     };
     static displayName = `Stylable_${getDisplayName(CustomComponent)}`;
 

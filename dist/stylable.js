@@ -102,9 +102,9 @@ function createStylableComponent(CustomComponent) {
     styletron: _react.PropTypes.object.isRequired,
 
     // from ThemeProvider
-    themeProvider: {
+    themeProvider: _react.PropTypes.shape({
       applyMiddleware: _react.PropTypes.func.isRequired
-    }
+    })
   }, _class.displayName = 'Stylable_' + (0, _utils.getDisplayName)(CustomComponent), _temp2);
 
   return StylableComponent;
