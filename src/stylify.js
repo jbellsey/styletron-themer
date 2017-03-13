@@ -74,9 +74,11 @@ export function createStyledComponent(CustomComponent, defaultStyle, makeStyles)
       styletron:        PropTypes.object.isRequired,
 
       // from ThemeProvider
-      theme:            PropTypes.object.isRequired,
-      installComponent: PropTypes.func.isRequired,
-      applyMiddleware:  PropTypes.func.isRequired
+      themeProvider: PropTypes.shape({
+        theme:            PropTypes.object.isRequired,
+        installComponent: PropTypes.func.isRequired,
+        applyMiddleware:  PropTypes.func.isRequired
+      }).isRequired
     };
     static displayName = `Styled_${getDisplayName(CustomComponent)}`;
 
@@ -101,12 +103,12 @@ export function createStyledComponent(CustomComponent, defaultStyle, makeStyles)
 
     constructor(props, context) {
       super(props, context);
-      if (!context.installComponent) {
+      if (!context.themeProvider) {
         // TODO: throw or console.error
       }
 
       // ensure that the component's default styles are inserted into the master theme
-      context.installComponent(getDisplayName(CustomComponent), defaultStyle);
+      context.themeProvider.installComponent(getDisplayName(CustomComponent), defaultStyle);
     }
 
     // this is where the magic happens. here we figure out what styles need to be applied
@@ -114,7 +116,7 @@ export function createStyledComponent(CustomComponent, defaultStyle, makeStyles)
     //
     getStyle() {
       let // the theme is stored on context. this is our default theme, plus the user's overrides
-          masterTheme = this.context.theme,
+          masterTheme = this.context.themeProvider.theme,
 
           // the theme for this component only. the fallback was used when we didn't require
           // a ThemeProvider as an ancestor, and should not be needed any more
@@ -146,13 +148,13 @@ export function createStyledComponent(CustomComponent, defaultStyle, makeStyles)
       styleObj = _.merge({}, styleObj, this.props.style);
 
       // lastly, middleware
-      return this.context.applyMiddleware(styleObj);
+      return this.context.themeProvider.applyMiddleware(styleObj);
     }
 
     render() {
       const styleProperties = this.getStyle(),
             {className, ...otherProps} = this.props,
-            {styletron, theme} = this.context,
+            {styletron, themeProvider: {theme}} = this.context,
 
             // convert the style properties into a set of classes. this is where
             // we let styletron do its magic

@@ -78,7 +78,7 @@ function createStylableComponent(CustomComponent) {
         }
 
         var allStyles = _merge3.default.apply(undefined, [{}].concat(styletronObjects));
-        allStyles = _this.context.applyMiddleware(allStyles);
+        allStyles = _this.context.themeProvider.applyMiddleware(allStyles);
         return (0, _styletronUtils.injectStylePrefixed)(_this.context.styletron, allStyles);
       }, _temp), _possibleConstructorReturn(_this, _ret);
     }
@@ -102,7 +102,9 @@ function createStylableComponent(CustomComponent) {
     styletron: _react.PropTypes.object.isRequired,
 
     // from ThemeProvider
-    applyMiddleware: _react.PropTypes.func.isRequired
+    themeProvider: {
+      applyMiddleware: _react.PropTypes.func.isRequired
+    }
   }, _class.displayName = 'Stylable_' + (0, _utils.getDisplayName)(CustomComponent), _temp2);
 
   return StylableComponent;

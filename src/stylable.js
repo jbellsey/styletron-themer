@@ -38,13 +38,15 @@ export function createStylableComponent(CustomComponent) {
       styletron:       PropTypes.object.isRequired,
 
       // from ThemeProvider
-      applyMiddleware: PropTypes.func.isRequired
+      themeProvider: {
+        applyMiddleware: PropTypes.func.isRequired
+      }
     };
     static displayName = `Stylable_${getDisplayName(CustomComponent)}`;
 
     injectStyles = (...styletronObjects) => {
       let allStyles = _.merge({}, ...styletronObjects);
-      allStyles = this.context.applyMiddleware(allStyles);
+      allStyles = this.context.themeProvider.applyMiddleware(allStyles);
       return injectStylePrefixed(this.context.styletron, allStyles);
     };
 

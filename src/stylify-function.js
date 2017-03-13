@@ -2,6 +2,7 @@ import {PropTypes, Component} from 'react';
 import _ from 'lodash';
 import {injectStylePrefixed} from 'styletron-utils';
 
+let unnamedCounter = 0;
 
 class Stylified extends Component {
 
@@ -12,9 +13,11 @@ class Stylified extends Component {
     styletron:        PropTypes.object.isRequired,
 
     // from ThemeProvider
-    theme:            PropTypes.object.isRequired,
-    installComponent: PropTypes.func.isRequired,
-    applyMiddleware:  PropTypes.func.isRequired
+    themeProvider:    PropTypes.shape({
+      theme:            PropTypes.object.isRequired,
+      installComponent: PropTypes.func.isRequired,
+      applyMiddleware:  PropTypes.func.isRequired
+    })
   };
 
   /*
@@ -41,14 +44,19 @@ class Stylified extends Component {
 
   constructor(props, context) {
     super(props, context);
-    if (!context.installComponent) {
+    if (!context.themeProvider) {
       // TODO: throw or console.error
     }
 
     this.componentName = props.name;
 
-    // ensure that the component's default styles are inserted into the master theme
-    context.installComponent(props.name, props.defaultStyle);
+    // ensure that the component's default styles are inserted into the master theme.
+    // unnamed components are not installed into the theme
+    //
+    if (this.componentName)
+      context.themeProvider.installComponent(props.name, props.defaultStyle);
+    else
+      this.componentName = `Unnamd_${unnamedCounter++}`;   // guaranteed to not be a legit component name in the theme
   }
 
   // this is where the magic happens. here we figure out what styles need to be applied
@@ -56,7 +64,7 @@ class Stylified extends Component {
   //
   getStyle() {
     let // the theme is stored on context. this is our default theme, plus the user's overrides
-      masterTheme = this.context.theme,
+      masterTheme = this.context.themeProvider.theme,
 
       // the theme for this component only. the fallback was used when we didn't require
       // a ThemeProvider as an ancestor, and should not be needed any more
@@ -88,13 +96,13 @@ class Stylified extends Component {
     styleObj = _.merge({}, styleObj, this.props.style);
 
     // lastly, middleware
-    return this.context.applyMiddleware(styleObj);
+    return this.context.themeProvider.applyMiddleware(styleObj);
   }
 
   render() {
     const styleProperties = this.getStyle(),
           {className, children} = this.props,
-          {styletron, theme} = this.context,
+          {styletron, themeProvider: {theme}} = this.context,
 
           // convert the style properties into a set of classes. this is where
           // we let styletron do its magic
