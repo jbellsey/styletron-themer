@@ -18,18 +18,22 @@ tape('color mapper maps keys correctly', t => {
           color:           'prawn',
           backgroundColor: 'noop',
           background:      '30 basil things',
+          outline:         '3px dotted papaya',
+          stroke:          'papaya',
           fontColor:       'tofu'
         },
         expectedStyles = {
           color:           '111',
           backgroundColor: 'noop',
-          background:      '30 basil things',
+          background:      '30 222 things',
+          outline:         '3px dotted 444',
+          stroke:          '444',
           fontColor:       '333'
         },
         actualStyles = mapColorKeys(theme, inputStyles);
 
   t.plan(1);
-  t.equal(JSON.stringify(expectedStyles), JSON.stringify(actualStyles), 'output should map (or not) correctly');
+  t.equal(JSON.stringify(actualStyles), JSON.stringify(expectedStyles), 'output should map (or not) correctly');
 });
 
 tape('color mapper maps sub-keys correctly', t => {
@@ -55,7 +59,7 @@ tape('color mapper maps sub-keys correctly', t => {
         actualStyles = mapColorKeys(theme, inputStyles);
 
   t.plan(1);
-  t.equal(JSON.stringify(expectedStyles), JSON.stringify(actualStyles), 'should map inside deep nests');
+  t.equal(JSON.stringify(actualStyles), JSON.stringify(expectedStyles), 'should map inside deep nests');
 });
 
 tape('color mapper is pure: if no changes, no cloning', t => {
@@ -63,13 +67,13 @@ tape('color mapper is pure: if no changes, no cloning', t => {
   const inputStyles = {
           color:           '444',
           backgroundColor: '333',
-          background:      '222',
+          margin:          '222',
           fontColor:       '111'
         },
         actualStyles = mapColorKeys(theme, inputStyles);
 
   t.plan(1);
-  t.equal(inputStyles, actualStyles, 'the input object should not be copied or modified');
+  t.equal(actualStyles, inputStyles, 'the input object should not be copied or modified');
 });
 
 tape('color mapper is pure: if any changes, we get a different object', t => {
@@ -77,13 +81,13 @@ tape('color mapper is pure: if any changes, we get a different object', t => {
   const inputStyles = {
           color:           'prawn',
           backgroundColor: 'noop',
-          background:      '30 basil things',
+          background:      '30 222 things',
           fontColor:       'tofu'
         },
         actualStyles = mapColorKeys(theme, inputStyles);
 
   t.plan(1);
-  t.notEqual(inputStyles, actualStyles, 'the input object should be copied when colors are mapped');
+  t.notEqual(actualStyles, inputStyles, 'the input object should be copied when colors are mapped');
 });
 
 tape('color mapper is pure: if any changes in nested objects, we get a different object', t => {
@@ -100,5 +104,5 @@ tape('color mapper is pure: if any changes in nested objects, we get a different
         actualStyles = mapColorKeys(theme, inputStyles);
 
   t.plan(1);
-  t.notEqual(inputStyles, actualStyles, 'the input object should be copied when colors are mapped in nested objects');
+  t.notEqual(actualStyles, inputStyles, 'the input object should be copied when colors are mapped in nested objects');
 });

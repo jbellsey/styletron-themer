@@ -1,6 +1,6 @@
 {
   "name": "styletron-themer",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "description": "Themable component-building tool for Styletron & React",
   "keywords": [
     "Styletron",

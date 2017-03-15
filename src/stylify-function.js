@@ -101,30 +101,26 @@ class Stylified extends Component {
 
   render() {
     const styleProperties = this.getStyle(),
-          {className, children} = this.props,
+          {className, children, ...otherProps} = this.props,
+          {name, defaultStyle, makeStyles, style, ...passThroughProps} = otherProps,  // eslint-disable-line
           {styletron, themeProvider: {theme}} = this.context,
 
           // convert the style properties into a set of classes. this is where
           // we let styletron do its magic
           styletronClasses = injectStylePrefixed(styletron, styleProperties);
 
-    /*
-     a quick note on refs: if your component needs to expose a ref, you have to do it
-     yourself. e.g., expose a "stashRef" prop in the component that lets the owner
-     retrieve the ref directly. unfortunately, HoCs make it hard to make a pass-through
-     ref to get access to the underlying component.
-     */
-
     return children({
 
-        // see above for comments on the use of the className prop for legacy CSS classes
-        className      : (className ? className + ' ' : '') + styletronClasses,
+      // see above for comments on the use of the className prop for legacy CSS classes
+      className:      (className ? className + ' ' : '') + styletronClasses,
 
-        // the base theme of your component
-        componentTheme : theme[this.componentName],
+      // the base theme of your component
+      componentTheme: theme[this.componentName],
 
-        // the global meta (for colors, etc)
-        globalMeta     : theme.meta
+      // the global meta (for colors, etc)
+      globalMeta:     theme.meta,
+
+      passThrough:    passThroughProps
     });
   }
 }

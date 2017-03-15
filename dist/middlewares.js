@@ -19,16 +19,42 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   it simply provides a single middleware tool for color mapping.
 */
 
+var fullTextSearch = ['background', 'border', 'outline'],
+    svgAttributes = ['stroke', 'fill'];
+
 function isKeyColorRelated(key) {
 
-  // we need to trap both "color" and "Color". no need to lowercase;
-  // instead we just look for "olor", which is a safe search
+  // we need to trap both "color" and "Color" in the attribute name. so we just
+  // look for "olor", which is a safe search (i.e., there are no false positives)
   //
   if (key.indexOf('olor') > -1) return true;
 
-  // svg properties are special cases
+  // a few custom attributes that don't have "color" in their names
   //
-  return key === 'stroke' || key === 'fill';
+  return svgAttributes.concat(fullTextSearch).indexOf(key) !== -1;
+}
+
+function valueMapper(theme, key, value) {
+  // if the value is a simple match for an existing color, use it
+  var outputColor = theme.meta.colors[value];
+  if (outputColor) return outputColor;
+
+  // for shorthand properties ("background"), we have to do a full text search & replace
+  if (fullTextSearch.indexOf(key) > -1) {
+    var anyChanges = false;
+    outputColor = value;
+
+    Object.keys(theme.meta.colors).forEach(function (oneColor) {
+
+      var re = new RegExp('\\b' + oneColor + '\\b');
+
+      outputColor = outputColor.replace(re, function () {
+        anyChanges = true;
+        return theme.meta.colors[oneColor];
+      });
+    });
+    if (anyChanges) return outputColor;
+  }
 }
 
 // the heavy lifting is done here. this function doesn't know anything about
@@ -54,7 +80,7 @@ function styleDive(theme, styles, keyTester, valueMapper) {
     } else if (keyTester(key)) {
 
       var originalValue = styles[key],
-          mappedValue = valueMapper(originalValue);
+          mappedValue = valueMapper(key, originalValue);
 
       if (mappedValue !== undefined) {
         cloneNow();
@@ -75,7 +101,5 @@ function styleDive(theme, styles, keyTester, valueMapper) {
 // returned untouched.
 //
 function mapColorKeys(theme, styles) {
-  return styleDive(theme, styles, isKeyColorRelated, function (color) {
-    return theme.meta.colors[color];
-  }).styles;
+  return styleDive(theme, styles, isKeyColorRelated, valueMapper.bind(null, theme)).styles;
 }
