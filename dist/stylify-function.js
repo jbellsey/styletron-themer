@@ -156,7 +156,7 @@ var Stylified = (_temp = _class = function (_Component) {
     applyMiddleware: _react.PropTypes.func.isRequired
   })
 }, _class.propTypes = {
-  name: _react.PropTypes.string.isRequired,
+  name: _react.PropTypes.string, // unnamed components are not themeable; useful for one-offs
   defaultStyle: _react.PropTypes.object,
   makeStyles: _react.PropTypes.func,
   className: _react.PropTypes.string,

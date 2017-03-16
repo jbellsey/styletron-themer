@@ -34,7 +34,7 @@ class Stylified extends Component {
    not an inline style attribute
    */
   static propTypes = {
-    name:         PropTypes.string.isRequired,
+    name:         PropTypes.string,   // unnamed components are not themeable; useful for one-offs
     defaultStyle: PropTypes.object,
     makeStyles:   PropTypes.func,
     className:    PropTypes.string,
