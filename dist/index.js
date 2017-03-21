@@ -36,6 +36,10 @@ var _stylifyFunction = require('./stylify-function');
 
 var _stylifyFunction2 = _interopRequireDefault(_stylifyFunction);
 
+var _styled = require('./styled');
+
+var _styled2 = _interopRequireDefault(_styled);
+
 var _stylable3 = _interopRequireDefault(_stylable2);
 
 var _stylify3 = _interopRequireDefault(_stylify2);
@@ -46,9 +50,9 @@ var _themeProvider2 = _interopRequireDefault(_themeProvider);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var Styled = _stylifyFunction2.default;
-exports.Stylified = _stylifyFunction2.default;
-exports.Styled = Styled;
+exports.Stylified = _stylifyFunction2.default; // deprecated
+
+exports.Styled = _styled2.default;
 exports.stylable = _stylable3.default;
 exports.stylify = _stylify3.default;
 exports.ThemeProvider = _themeProvider2.default;

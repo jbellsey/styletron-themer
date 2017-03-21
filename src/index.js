@@ -1,6 +1,5 @@
-import Stylified from './stylify-function';
-const Styled = Stylified;
-export {Stylified, Styled};
+export Stylified from './stylify-function';   // deprecated
+export Styled from './styled';
 export stylable, {createStylableComponent} from './stylable';
 export stylify, {createStyledComponent} from './stylify';
 export ThemeProvider from './theme-provider';

@@ -77,8 +77,10 @@ function createStylableComponent(CustomComponent) {
           styletronObjects[_key2] = arguments[_key2];
         }
 
-        var allStyles = _merge3.default.apply(undefined, [{}].concat(styletronObjects));
-        allStyles = _this.context.themeProvider.applyMiddleware(allStyles);
+        var allStyles = _merge3.default.apply(undefined, [{}].concat(styletronObjects)),
+            themeProvider = _this.context.themeProvider;
+
+        if (themeProvider) allStyles = themeProvider.applyMiddleware(allStyles);
         return (0, _styletronUtils.injectStylePrefixed)(_this.context.styletron, allStyles);
       }, _temp), _possibleConstructorReturn(_this, _ret);
     }
@@ -89,8 +91,10 @@ function createStylableComponent(CustomComponent) {
     _createClass(StylableComponent, [{
       key: 'render',
       value: function render() {
+        // TODO: "injectStyles" prop is deprecated. use "classify"
         return _react2.default.createElement(CustomComponent, _extends({}, this.props, {
-          injectStyles: this.injectStyles
+          injectStyles: this.injectStyles,
+          classify: this.injectStyles
         }));
       }
     }]);

@@ -4,6 +4,8 @@ import React from 'react';
 import Styletron from 'styletron-server';   // we use the server package here
 import {mount, getAttributesAsObject} from './spec-helpers/helpers';
 import stylify, {createStyledComponent} from '../stylify';
+import Stylified from '../stylify-function';
+import Styled from '../styled';
 import {installLibraryMeta} from '../default-theme';
 
 /*
@@ -92,9 +94,7 @@ function Stateless(props) {
 const TestStateless = stylify(defaultStyles, makeStyles)(Stateless);
 
 
-import Stylified from '../stylify-function';
-
-class TestFunctionComponent extends React.Component {
+class TestDeprecatedFunctionComponent extends React.Component {
   static propTypes = ourPropTypes;
   render() {
     return (
@@ -109,6 +109,26 @@ class TestFunctionComponent extends React.Component {
           return <div className={className} {...this.props}>Test</div>;
         }}
       </Stylified>
+    );
+  }
+}
+
+
+class TestFunctionComponent extends React.Component {
+  static propTypes = ourPropTypes;
+  render() {
+    return (
+      <Styled
+        name         = {this.constructor.name}
+        staticStyle  = {defaultStyles}
+        dynamicStyle = {makeStyles}
+        {...this.props}
+      >
+        {newProps => {
+          let {className} = newProps;
+          return <div className={className} {...this.props}>Test</div>;
+        }}
+      </Styled>
     );
   }
 }
@@ -147,6 +167,10 @@ const testSuites = {
   stateless: {
     Component: TestStateless,
     name:      'Stateless'
+  },
+  deprecatedFunc: {
+    Component: TestDeprecatedFunctionComponent,
+    name:      'TestDeprecatedFunctionComponent'
   },
   func: {
     Component: TestFunctionComponent,
