@@ -45,16 +45,20 @@ export function createStylableComponent(CustomComponent) {
     static displayName = `Stylable_${getDisplayName(CustomComponent)}`;
 
     injectStyles = (...styletronObjects) => {
-      let allStyles = _.merge({}, ...styletronObjects);
-      allStyles = this.context.themeProvider.applyMiddleware(allStyles);
+      let allStyles = _.merge({}, ...styletronObjects),
+          {themeProvider} = this.context;
+      if (themeProvider)
+        allStyles = themeProvider.applyMiddleware(allStyles);
       return injectStylePrefixed(this.context.styletron, allStyles);
     };
 
     render() {
+      // TODO: "injectStyles" prop is deprecated. use "classify"
       return (
         <CustomComponent
           {...this.props}
           injectStyles = {this.injectStyles}
+          classify = {this.injectStyles}
         />
       );
     }
