@@ -85,7 +85,7 @@ function stylify(defaultStyle, makeStyles) {
   this function is passed down as a prop to all components.
 */
 function stripProps(propsObject, propsToStrip) {
-  return (0, _omit3.default)(propsObject, ['children', 'className', 'style', 'stripProps', 'componentTheme', 'globalMeta', 'injectStyles'], propsToStrip);
+  return (0, _omit3.default)(propsObject, ['children', 'className', 'style', 'stripProps', 'componentTheme', 'globalMeta', 'injectStyles', 'classify'], propsToStrip);
 }
 
 /*

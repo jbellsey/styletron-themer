@@ -52,7 +52,7 @@ export default function stylify(defaultStyle, makeStyles) {
 function stripProps(propsObject, propsToStrip) {
   return _.omit(
     propsObject,
-    ['children', 'className', 'style', 'stripProps', 'componentTheme', 'globalMeta', 'injectStyles'],
+    ['children', 'className', 'style', 'stripProps', 'componentTheme', 'globalMeta', 'injectStyles', 'classify'],
     propsToStrip
   );
 }
