@@ -6,7 +6,7 @@ import {isObject} from './utils';
   it simply provides a single middleware tool for color mapping.
 */
 
-const fullTextSearch = ['background', 'border', 'outline'],
+const fullTextSearch = ['background', 'border', 'borderColor', 'outline'],
       svgAttributes  = ['stroke', 'fill'];
 
 function isKeyColorRelated(key) {

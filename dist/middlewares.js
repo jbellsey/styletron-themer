@@ -19,7 +19,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   it simply provides a single middleware tool for color mapping.
 */
 
-var fullTextSearch = ['background', 'border', 'outline'],
+var fullTextSearch = ['background', 'border', 'borderColor', 'outline'],
     svgAttributes = ['stroke', 'fill'];
 
 function isKeyColorRelated(key) {
