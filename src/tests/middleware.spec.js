@@ -17,6 +17,7 @@ tape('color mapper maps keys correctly', t => {
   const inputStyles = {
           color:           'prawn',
           backgroundColor: 'noop',
+          borderColor:     'tofu transparent transparent',
           background:      '30 basil things',
           outline:         '3px dotted papaya',
           stroke:          'papaya',
@@ -25,6 +26,7 @@ tape('color mapper maps keys correctly', t => {
         expectedStyles = {
           color:           '111',
           backgroundColor: 'noop',
+          borderColor:     '333 transparent transparent',
           background:      '30 222 things',
           outline:         '3px dotted 444',
           stroke:          '444',

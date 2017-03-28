@@ -109,19 +109,22 @@ class Styled extends Component {
           // we let styletron do its magic
           styletronClasses = injectStylePrefixed(styletron, styleProperties);
 
-    return children({
+    // invoke the render callback with two params
+    return children(
 
       // see above for comments on the use of the className prop for legacy CSS classes
-      className:      (className ? className + ' ' : '') + styletronClasses,
+      (className ? className + ' ' : '') + styletronClasses,
 
-      // the base theme of your component
-      componentTheme: theme[this.componentName],
+      {
+        // the base theme of your component
+        componentTheme: theme[this.componentName],
 
-      // the global meta (for colors, etc)
-      globalMeta:     theme.meta,
+        // the global meta (for colors, etc)
+        globalMeta:     theme.meta,
 
-      passThrough:    passThroughProps
-    });
+        passThrough:    passThroughProps
+      }
+      );
   }
 }
 

@@ -126,12 +126,11 @@ var Styled = (_temp = _class = function (_Component) {
           theme = _context.themeProvider.theme,
           styletronClasses = (0, _styletronUtils.injectStylePrefixed)(styletron, styleProperties);
 
+      // invoke the render callback with two params
+      return children(
 
-      return children({
-
-        // see above for comments on the use of the className prop for legacy CSS classes
-        className: (className ? className + ' ' : '') + styletronClasses,
-
+      // see above for comments on the use of the className prop for legacy CSS classes
+      (className ? className + ' ' : '') + styletronClasses, {
         // the base theme of your component
         componentTheme: theme[this.componentName],
 

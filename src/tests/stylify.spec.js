@@ -124,10 +124,7 @@ class TestFunctionComponent extends React.Component {
         dynamicStyle = {makeStyles}
         {...this.props}
       >
-        {newProps => {
-          let {className} = newProps;
-          return <div className={className} {...this.props}>Test</div>;
-        }}
+        {className => <div className={className} {...this.props}>Test</div>}
       </Styled>
     );
   }
