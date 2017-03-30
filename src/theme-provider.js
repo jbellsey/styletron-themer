@@ -38,7 +38,7 @@ export default class ThemeProvider extends Component {
     // would be easy to add in the future.
     //
     this.theme               = _.merge({}, getDefaultTheme(), props.theme);
-    this.middlewares         = props.middlewares || [];
+    this.middlewares         = props.middlewares || [availableMiddlewares.mapColorKeys];
     this.installedComponents = [];
   }
 

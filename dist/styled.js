@@ -137,6 +137,7 @@ var Styled = (_temp = _class = function (_Component) {
         // the global meta (for colors, etc)
         globalMeta: theme.meta,
 
+        // TODO: this may be unnecessary. needs consideration.
         passThrough: passThroughProps
       });
     }

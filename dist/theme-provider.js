@@ -81,7 +81,7 @@ var ThemeProvider = (_temp = _class = function (_Component) {
     };
 
     _this.theme = (0, _merge3.default)({}, (0, _defaultTheme2.default)(), props.theme);
-    _this.middlewares = props.middlewares || [];
+    _this.middlewares = props.middlewares || [availableMiddlewares.mapColorKeys];
     _this.installedComponents = [];
     return _this;
   }
