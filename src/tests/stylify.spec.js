@@ -2,9 +2,7 @@ import tape from 'blue-tape';
 import _ from 'lodash';
 import React from 'react';
 import Styletron from 'styletron-server';   // we use the server package here
-import {mount, getAttributesAsObject} from './spec-helpers/helpers';
-import stylify, {createStyledComponent} from '../stylify';
-import Stylified from '../stylify-function';
+import {mount} from './spec-helpers/helpers';
 import Styled from '../styled';
 import {installLibraryMeta} from '../default-theme';
 
@@ -36,13 +34,13 @@ const ourPropTypes = {
   layer: React.PropTypes.number
 };
 
-const defaultStyles = {
+const staticStyle = {
   fontSize: '33px',
   zIndex:   '333',
   color:    null    // see below
 };
 
-function makeStyles({componentTheme, props}) {
+function dynamicStyle({componentTheme, props}) {
   const {size, layer} = props,
         instanceStyles = {};
 
@@ -59,69 +57,14 @@ function makeStyles({componentTheme, props}) {
   return allStyles;
 }
 
-class TestComponent extends React.Component {
-  static propTypes = ourPropTypes;
-  render() {
-    const {className, stripProps} = this.props,
-          otherProps = stripProps(this.props, ['size', 'layer']);
-    return <div className={className} {...otherProps}>Test</div>;
-  }
-}
-
-// one test component with the higher-order component
-//
-const TestHoC = createStyledComponent(TestComponent, defaultStyles, makeStyles);
-
-// and another component with the decorator
-//
-@stylify(defaultStyles, makeStyles)
-class TestDecorator extends React.Component {
-  static propTypes = ourPropTypes;
-  render() {
-    const {className, stripProps} = this.props,
-          otherProps = stripProps(this.props, ['size', 'layer']);
-    return <div className={className} {...otherProps}>Test</div>;
-  }
-}
-
-// one more as stateless functional component
-//
-function Stateless(props) {
-  const {className, stripProps} = props,
-        otherProps = stripProps(props, ['size', 'layer']);
-  return <div className={className} {...otherProps}>Test</div>;
-}
-const TestStateless = stylify(defaultStyles, makeStyles)(Stateless);
-
-
-class TestDeprecatedFunctionComponent extends React.Component {
-  static propTypes = ourPropTypes;
-  render() {
-    return (
-      <Stylified
-        name         = {this.constructor.name}
-        defaultStyle = {defaultStyles}
-        makeStyles   = {makeStyles}
-        {...this.props}
-      >
-        {newProps => {
-          let {className} = newProps;
-          return <div className={className} {...this.props}>Test</div>;
-        }}
-      </Stylified>
-    );
-  }
-}
-
-
 class TestFunctionComponent extends React.Component {
   static propTypes = ourPropTypes;
   render() {
     return (
       <Styled
         name         = {this.constructor.name}
-        staticStyle  = {defaultStyles}
-        dynamicStyle = {makeStyles}
+        staticStyle  = {staticStyle}
+        dynamicStyle = {dynamicStyle}
         {...this.props}
       >
         {className => <div className={className} {...this.props}>Test</div>}
@@ -137,13 +80,13 @@ class TestUnnamedFunctionComponent extends React.Component {
   static propTypes = ourPropTypes;
   render() {
     return (
-      <Stylified
-        defaultStyle = {defaultStyles}
-        makeStyles   = {makeStyles}
+      <Styled
+        staticStyle  = {staticStyle}
+        dynamicStyle = {dynamicStyle}
         {...this.props}
       >
         {({className}) => <div className={className} {...this.props}>Test</div>}
-      </Stylified>
+      </Styled>
     );
   }
 }
@@ -153,22 +96,6 @@ class TestUnnamedFunctionComponent extends React.Component {
 //------ end test setup
 
 const testSuites = {
-  hoc: {
-    Component: TestHoC,
-    name:      'TestComponent'
-  },
-  decorator: {
-    Component: TestDecorator,
-    name:      'TestDecorator'
-  },
-  stateless: {
-    Component: TestStateless,
-    name:      'Stateless'
-  },
-  deprecatedFunc: {
-    Component: TestDeprecatedFunctionComponent,
-    name:      'TestDeprecatedFunctionComponent'
-  },
   func: {
     Component: TestFunctionComponent,
     name:      'TestFunctionComponent'
@@ -189,14 +116,14 @@ function runTestSuite(componentType) {
 
   tape(t => {
 
-    t.test(`stylify passes through custom attributes (type: ${componentType})`, t => {
+    t.test(`Styled component passes through custom attributes (type: ${componentType})`, t => {
       let c = mount(<ComponentUnderTest id="test-id" data-peanut-butter="crunchy" />).getDOMNode();
       t.plan(2);
-      t.equal(c.getAttribute('id'), 'test-id', 'stylify should pass through id attribute');
-      t.equal(c.getAttribute('data-peanut-butter'), 'crunchy', 'stylify should pass through data attributes');
+      t.equal(c.getAttribute('id'), 'test-id', 'Styled component should pass through id attribute');
+      t.equal(c.getAttribute('data-peanut-butter'), 'crunchy', 'Styled component should pass through data attributes');
     });
 
-    t.test(`stylify processes default styles without a theme (type: ${componentType})`, t => {
+    t.test(`Styled component processes default styles without a theme (type: ${componentType})`, t => {
       let fontSize = null;
 
       styleWatcher.start(allStyles => {fontSize = allStyles.fontSize;});
@@ -204,10 +131,10 @@ function runTestSuite(componentType) {
       styleWatcher.end();
 
       t.plan(1);
-      t.equal(fontSize, '33px', 'stylify should pass default attributes to the component');
+      t.equal(fontSize, '33px', 'Styled component should pass default attributes to the component');
     });
 
-    t.test(`stylify adapts to props correctly (type: ${componentType})`, t => {
+    t.test(`Styled component adapts to props correctly (type: ${componentType})`, t => {
       let fontSize = null;
 
       t.plan(2);
@@ -224,7 +151,7 @@ function runTestSuite(componentType) {
 
     // these tests do not apply to unnamed components
     if (componentName) {
-      t.test(`stylify lets the user override default styles in the theme (type: ${componentType})`, t => {
+      t.test(`Styled component lets the user override default styles in the theme (type: ${componentType})`, t => {
         let fontSize = null,
             zIndex   = null,
             color    = null,
@@ -245,12 +172,12 @@ function runTestSuite(componentType) {
         styleWatcher.end();
 
         t.plan(3);
-        t.equal(fontSize, '99px', 'stylify should use style values from the theme when applicable');
-        t.equal(zIndex,   '999',  'stylify should use style values from the theme when applicable');
-        t.equal(color,    'red',  'stylify should use style values from the theme when applicable');
+        t.equal(fontSize, '99px', 'Styled component should use style values from the theme when applicable');
+        t.equal(zIndex,   '999',  'Styled component should use style values from the theme when applicable');
+        t.equal(color,    'red',  'Styled component should use style values from the theme when applicable');
       });
 
-      t.test(`stylify applies middleware correctly (type: ${componentType})`, t => {
+      t.test(`Styled component applies middleware correctly (type: ${componentType})`, t => {
         let localStyletron = new Styletron(),
             theme = {
               meta: {
@@ -277,7 +204,7 @@ function runTestSuite(componentType) {
         });
       });
 
-      t.test(`stylify lets the library install its own meta (type: ${componentType})`, t => {
+      t.test(`Styled component lets the library install its own meta (type: ${componentType})`, t => {
         let localStyletron = new Styletron(),
             libraryMeta = {     // library meta overrides the default theme
               colors: {
@@ -315,7 +242,7 @@ function runTestSuite(componentType) {
       });
     }
 
-    t.test(`stylify lets the user override default styles per component with inline styles (type: ${componentType})`, t => {
+    t.test(`Styled component lets the user override default styles per component with inline styles (type: ${componentType})`, t => {
       let localStyletron = new Styletron(),
           customStyles = {
             fontSize: '88px',
@@ -338,38 +265,8 @@ function runTestSuite(componentType) {
       });
     });
 
-    t.test(`stripProps cleans attribute list properly (type: ${componentType})`, t => {
-      let component = (
-            <ComponentUnderTest
-              id    = "spillover"
-              size  = "small"
-              layer = {101}
-              data-philosophy = "nihilism"
-            />
-          ),
-          node = mount(component).getDOMNode(),
-          attrs = getAttributesAsObject(node),
-          attrKeys = Object.keys(attrs),
-          nonDataKeys = attrKeys.filter(key => !/^data-/.test(key));
-
-      t.plan(6);
-      t.equal(nonDataKeys.length, 2, 'should have exactly two attributes that are not data- attributes');
-      t.equal(nonDataKeys.indexOf('class') >= 0, true, 'should have a class attribute (applied by styletron)');
-      t.equal(nonDataKeys.indexOf('id') >= 0, true, 'should have an ID attribute (entered manually)');
-
-      t.equal(attrs.id, 'spillover', 'should have the given ID');
-      t.equal(attrs['data-philosophy'], 'nihilism', 'should have the given data attribute');
-
-      t.equal(attrs.class.length > 0, true, 'should have some classes applied');
-    });
-
     t.end();
   });
 }
 
 Object.keys(testSuites).forEach(key => runTestSuite(key));
-
-// special test for the unnamed function component. i.e., this component uses the render-function
-// component, but it doesn't tell us its name. this should work fine, but the component's styles
-// are not added to the theme for overriding
-//
