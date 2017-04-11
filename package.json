@@ -10,9 +10,7 @@
   "main": "dist/styletron-themer.cjs.js",
   "module": "dist/styletron-themer.es.js",
   "scripts": {
-    "rollup": "rollup -c rollup.config.js",
-    "prebuild": "rm -rf dist/; mkdir dist;",
-    "build": "babel src --ignore spec.js,spec-helpers/**.js --out-dir dist",
+    "build": "rollup -c rollup.config.js",
     "test": "karma start",
     "test:ci": "TEST_ENV=ci karma start",
     "lint": "eslint .",
