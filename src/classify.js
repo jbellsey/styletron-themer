@@ -1,4 +1,5 @@
-import React, {PropTypes, Component} from 'react';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 import {injectStylePrefixed} from 'styletron-utils';
 import {getDisplayName} from './utils';
@@ -44,7 +45,7 @@ export function classifyComponent(CustomComponent) {
     };
     static displayName = `Classify_${getDisplayName(CustomComponent)}`;
 
-    injectStyles = (...styletronObjects) => {
+    classifyStyles = (...styletronObjects) => {
       let allStyles = _.merge({}, ...styletronObjects),
           {themeProvider} = this.context;
       if (themeProvider)
@@ -56,7 +57,7 @@ export function classifyComponent(CustomComponent) {
       return (
         <CustomComponent
           {...this.props}
-          classify = {this.injectStyles}
+          classify = {this.classifyStyles}
         />
       );
     }

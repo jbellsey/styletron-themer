@@ -14,6 +14,10 @@ var _class, _temp;
 
 var _react = require('react');
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _styletronUtils = require('styletron-utils');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -65,7 +69,7 @@ var Styled = (_temp = _class = function (_Component) {
    this overloads React's "style" prop. it integrates with the styletron system,
    so the result of passing a style prop will actually be additional classes,
    not an inline style attribute
-   */
+  */
 
 
   _createClass(Styled, [{
@@ -137,7 +141,7 @@ var Styled = (_temp = _class = function (_Component) {
         // the global meta (for colors, etc)
         globalMeta: theme.meta,
 
-        // TODO: this may be unnecessary. needs consideration.
+        // TODO: deprecated. to be removed.
         passThrough: passThroughProps
       });
     }
@@ -147,20 +151,20 @@ var Styled = (_temp = _class = function (_Component) {
 }(_react.Component), _class.contextTypes = {
 
   // from StyletronProvider (see styletron-react)
-  styletron: _react.PropTypes.object.isRequired,
+  styletron: _propTypes2.default.object.isRequired,
 
   // from ThemeProvider
-  themeProvider: _react.PropTypes.shape({
-    theme: _react.PropTypes.object.isRequired,
-    installComponent: _react.PropTypes.func.isRequired,
-    applyMiddleware: _react.PropTypes.func.isRequired
+  themeProvider: _propTypes2.default.shape({
+    theme: _propTypes2.default.object.isRequired,
+    installComponent: _propTypes2.default.func.isRequired,
+    applyMiddleware: _propTypes2.default.func.isRequired
   })
 }, _class.propTypes = {
-  name: _react.PropTypes.string, // unnamed components are not themeable; useful for one-offs
-  staticStyle: _react.PropTypes.object,
-  dynamicStyle: _react.PropTypes.func,
-  className: _react.PropTypes.string,
-  style: _react.PropTypes.object,
-  children: _react.PropTypes.func.isRequired
+  name: _propTypes2.default.string, // unnamed components are not themeable; useful for one-offs
+  staticStyle: _propTypes2.default.object,
+  dynamicStyle: _propTypes2.default.func,
+  className: _propTypes2.default.string,
+  style: _propTypes2.default.object,
+  children: _propTypes2.default.func.isRequired
 }, _temp);
 exports.default = Styled;

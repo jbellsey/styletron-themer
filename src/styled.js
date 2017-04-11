@@ -1,4 +1,5 @@
-import {PropTypes, Component} from 'react';
+import {Component} from 'react';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 import {injectStylePrefixed} from 'styletron-utils';
 
@@ -32,7 +33,7 @@ class Styled extends Component {
    this overloads React's "style" prop. it integrates with the styletron system,
    so the result of passing a style prop will actually be additional classes,
    not an inline style attribute
-   */
+  */
   static propTypes = {
     name:         PropTypes.string,   // unnamed components are not themeable; useful for one-offs
     staticStyle:  PropTypes.object,
@@ -120,10 +121,10 @@ class Styled extends Component {
         componentTheme: theme[this.componentName],
 
         // the global meta (for colors, etc)
-        globalMeta:     theme.meta,
+        globalMeta: theme.meta,
 
-        // TODO: this may be unnecessary. needs consideration.
-        passThrough:    passThroughProps
+        // TODO: deprecated. to be removed.
+        passThrough: passThroughProps
       }
       );
   }

@@ -17,6 +17,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _defaultTheme = require('./default-theme');
 
 var _defaultTheme2 = _interopRequireDefault(_defaultTheme);
@@ -106,11 +110,11 @@ var ThemeProvider = (_temp = _class = function (_Component) {
 
   return ThemeProvider;
 }(_react.Component), _class.childContextTypes = {
-  themeProvider: _react.PropTypes.shape({
-    theme: _react.PropTypes.object.isRequired,
-    middlewares: _react.PropTypes.array,
-    installComponent: _react.PropTypes.func,
-    applyMiddleware: _react.PropTypes.func
+  themeProvider: _propTypes2.default.shape({
+    theme: _propTypes2.default.object.isRequired,
+    middlewares: _propTypes2.default.array,
+    installComponent: _propTypes2.default.func,
+    applyMiddleware: _propTypes2.default.func
   })
 }, _temp);
 
@@ -122,8 +126,8 @@ var ThemeProvider = (_temp = _class = function (_Component) {
 
 exports.default = ThemeProvider;
 ThemeProvider.propTypes = {
-  theme: _react.PropTypes.object,
-  middlewares: _react.PropTypes.array
+  theme: _propTypes2.default.object,
+  middlewares: _propTypes2.default.array
 };
 
 // provided as a convenient export for consumers. it is not

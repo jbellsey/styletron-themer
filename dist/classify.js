@@ -18,6 +18,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _styletronUtils = require('styletron-utils');
 
 var _utils = require('./utils');
@@ -72,7 +76,7 @@ function classifyComponent(CustomComponent) {
         args[_key] = arguments[_key];
       }
 
-      return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = ClassifiedComponent.__proto__ || Object.getPrototypeOf(ClassifiedComponent)).call.apply(_ref, [this].concat(args))), _this), _this.injectStyles = function () {
+      return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = ClassifiedComponent.__proto__ || Object.getPrototypeOf(ClassifiedComponent)).call.apply(_ref, [this].concat(args))), _this), _this.classifyStyles = function () {
         for (var _len2 = arguments.length, styletronObjects = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
           styletronObjects[_key2] = arguments[_key2];
         }
@@ -92,7 +96,7 @@ function classifyComponent(CustomComponent) {
       key: 'render',
       value: function render() {
         return _react2.default.createElement(CustomComponent, _extends({}, this.props, {
-          classify: this.injectStyles
+          classify: this.classifyStyles
         }));
       }
     }]);
@@ -101,11 +105,11 @@ function classifyComponent(CustomComponent) {
   }(_react.Component), _class.contextTypes = {
 
     // from StyletronProvider (see styletron-react)
-    styletron: _react.PropTypes.object.isRequired,
+    styletron: _propTypes2.default.object.isRequired,
 
     // from ThemeProvider
-    themeProvider: _react.PropTypes.shape({
-      applyMiddleware: _react.PropTypes.func.isRequired
+    themeProvider: _propTypes2.default.shape({
+      applyMiddleware: _propTypes2.default.func.isRequired
     })
   }, _class.displayName = 'Classify_' + (0, _utils.getDisplayName)(CustomComponent), _temp2);
 

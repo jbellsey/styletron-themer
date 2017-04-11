@@ -61,6 +61,7 @@
     "webpack": "^2.2"
   },
   "peerDependencies": {
+    "prop-types": "^15.5",
     "react": "^15",
     "react-dom": "^15",
     "styletron": "^2.5",
