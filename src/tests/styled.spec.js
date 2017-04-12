@@ -12,7 +12,7 @@ import {installLibraryMeta} from '../default-theme';
   inside the makeStyles() function. to track external factors (like middleware & inline styles),
   we'll need to look at the final generated CSS code. see below.
 */
-const styleWatcher = {
+const anythingWatcher = {
   _watcher: null,
   start(f) {
     this._watcher = f;
@@ -53,7 +53,7 @@ function dynamicStyle({componentTheme, props}) {
     instanceStyles.zIndex = layer;
 
   const allStyles = _.merge({}, componentTheme, instanceStyles);
-  styleWatcher.invoke(allStyles, componentTheme);
+  anythingWatcher.invoke(allStyles, componentTheme);
   return allStyles;
 }
 
@@ -105,7 +105,7 @@ const testSuites = {
   }
 };
 
-// we run the entire test suite multiple times
+// we run the entire basic test suite multiple times
 //
 function runTestSuite(componentType) {
 
@@ -126,9 +126,9 @@ function runTestSuite(componentType) {
     t.test(`Styled component processes default styles without a theme (type: ${componentType})`, t => {
       let fontSize = null;
 
-      styleWatcher.start(allStyles => {fontSize = allStyles.fontSize;});
+      anythingWatcher.start(allStyles => {fontSize = allStyles.fontSize;});
       mount(<ComponentUnderTest />);
-      styleWatcher.end();
+      anythingWatcher.end();
 
       t.plan(1);
       t.equal(fontSize, '33px', 'Styled component should pass default attributes to the component');
@@ -138,7 +138,7 @@ function runTestSuite(componentType) {
       let fontSize = null;
 
       t.plan(2);
-      styleWatcher.start(allStyles => {fontSize = allStyles.fontSize;});
+      anythingWatcher.start(allStyles => {fontSize = allStyles.fontSize;});
 
       mount(<ComponentUnderTest size='small' />);
       t.equal(fontSize, '11px', 'makeStyles function should adapt styles to props');
@@ -146,7 +146,7 @@ function runTestSuite(componentType) {
       mount(<ComponentUnderTest size='large' />);
       t.equal(fontSize, '55px', 'makeStyles function should adapt styles to props');
 
-      styleWatcher.end();
+      anythingWatcher.end();
     });
 
     // these tests do not apply to unnamed components
@@ -163,13 +163,13 @@ function runTestSuite(componentType) {
               }
             };
 
-        styleWatcher.start(allStyles => {
+        anythingWatcher.start(allStyles => {
           fontSize = allStyles.fontSize;
           zIndex   = allStyles.zIndex;
           color    = allStyles.color;
         });
         mount(<ComponentUnderTest />, theme);
-        styleWatcher.end();
+        anythingWatcher.end();
 
         t.plan(3);
         t.equal(fontSize, '99px', 'Styled component should use style values from the theme when applicable');
@@ -270,3 +270,99 @@ function runTestSuite(componentType) {
 }
 
 Object.keys(testSuites).forEach(key => runTestSuite(key));
+
+
+//--- other tests
+
+class TestRenderCallbackProps extends React.Component {
+  static propTypes = ourPropTypes;
+  render() {
+    return (
+      <Styled
+        name         = 'TestRenderCallbackProps'
+        staticStyle  = {staticStyle}
+        dynamicStyle = {dynamicStyle}
+        {...this.props}
+      >
+        {(className, paramBlock) => {
+          anythingWatcher.invoke(paramBlock);
+          return <div className={className} {...this.props}>Test</div>;
+        }}
+      </Styled>
+    );
+  }
+}
+
+tape.test('styled component passes all props to render callback', t => {
+
+  let customProps = {
+        id: '44',
+        'data-things': 'bonzo',
+        spotColor: 'red'
+      },
+      receivedProps;
+  anythingWatcher.start(paramBlock => receivedProps = paramBlock.props);
+  mount(<TestRenderCallbackProps {...customProps} />);
+  anythingWatcher.end();
+
+  t.equal(receivedProps.id, customProps.id, 'render callback should receive full props object');
+  t.equal(receivedProps['data-things'], customProps['data-things'], 'render callback should receive full props object');
+  t.equal(receivedProps.spotColor, customProps.spotColor, 'render callback should receive full props object');
+  t.end();
+});
+
+tape.test('styled component passes component theme to render callback (not overridden)', t => {
+
+  let receivedTheme;
+  anythingWatcher.start(paramBlock => receivedTheme = paramBlock.componentTheme);
+  mount(<TestRenderCallbackProps />);
+  anythingWatcher.end();
+
+  t.equal(receivedTheme.fontSize, staticStyle.fontSize, 'render callback should receive static styles');
+  t.equal(receivedTheme.zIndex, staticStyle.zIndex, 'render callback should receive static styles');
+  t.end();
+});
+
+tape.test('styled component passes component theme to render callback (with overridden theme)', t => {
+
+  let userTheme = {
+        TestRenderCallbackProps: {
+          fontSize: '99px',
+          zIndex:   '999'
+        }
+      },
+      receivedTheme;
+
+  anythingWatcher.start(paramBlock => receivedTheme = paramBlock.componentTheme);
+  mount(<TestRenderCallbackProps />, userTheme);
+  anythingWatcher.end();
+
+  t.equal(receivedTheme.fontSize, '99px', 'render callback should receive overridden theme styles');
+  t.equal(receivedTheme.zIndex, '999', 'render callback should receive overridden theme styles');
+  t.end();
+});
+
+tape.test('styled component passes global meta to render callback', t => {
+
+  let userTheme = {
+        TestRenderCallbackProps: {
+          fontSize: '99px',
+          zIndex:   '999'
+        },
+        meta: {
+          ocean: '11',
+          colors: {
+            bluish: '#204899'
+          }
+        }
+      },
+      receivedMeta;
+
+  anythingWatcher.start(paramBlock => receivedMeta = paramBlock.globalMeta);
+  mount(<TestRenderCallbackProps />, userTheme);
+  anythingWatcher.end();
+
+  t.equal(receivedMeta.ocean, '11', 'render callback should receive global meta');
+  t.equal(receivedMeta.colors.bluish, '#204899', 'render callback should receive global meta');
+  t.end();
+});

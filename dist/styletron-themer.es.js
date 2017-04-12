@@ -223,6 +223,11 @@ var Styled = (_temp = _class = function (_Component) {
         // the global meta (for colors, etc)
         globalMeta: theme.meta,
 
+        // give the children access to all props except those consumed here. useful for
+        // components that use render callbacks or have other prop-manipulations between
+        // the original element and the children (ohai React.cloneElement)
+        props: passThroughProps,
+
         // TODO: deprecated. to be removed.
         passThrough: passThroughProps
       });
