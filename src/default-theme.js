@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import assignDeep from 'assign-deep';
 
 const baseTheme = {
 
@@ -30,5 +30,5 @@ export function installLibraryMeta(t) {
 }
 
 export default function getDefaultTheme() {
-  return _.merge({}, baseTheme, {meta: libraryMeta});
+  return assignDeep({}, baseTheme, {meta: libraryMeta});
 }

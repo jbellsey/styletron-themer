@@ -1,7 +1,258 @@
-import _merge from 'lodash/merge';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { injectStylePrefixed } from 'styletron-utils';
+
+/*!
+ * is-primitive <https://github.com/jonschlinkert/is-primitive>
+ *
+ * Copyright (c) 2014-2015, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+// see http://jsperf.com/testing-value-is-primitive/7
+var index$1 = function isPrimitive(value) {
+  return value == null || (typeof value !== 'function' && typeof value !== 'object');
+};
+
+/*!
+ * assign-symbols <https://github.com/jonschlinkert/assign-symbols>
+ *
+ * Copyright (c) 2015, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+var index$3 = function(receiver, objects) {
+  if (receiver === null || typeof receiver === 'undefined') {
+    throw new TypeError('expected first argument to be an object.');
+  }
+
+  if (typeof objects === 'undefined' || typeof Symbol === 'undefined') {
+    return receiver;
+  }
+
+  if (typeof Object.getOwnPropertySymbols !== 'function') {
+    return receiver;
+  }
+
+  var isEnumerable = Object.prototype.propertyIsEnumerable;
+  var target = Object(receiver);
+  var len = arguments.length, i = 0;
+
+  while (++i < len) {
+    var provider = Object(arguments[i]);
+    var names = Object.getOwnPropertySymbols(provider);
+
+    for (var j = 0; j < names.length; j++) {
+      var key = names[j];
+
+      if (isEnumerable.call(provider, key)) {
+        target[key] = provider[key];
+      }
+    }
+  }
+  return target;
+};
+
+/*!
+ * Determine if an object is a Buffer
+ *
+ * @author   Feross Aboukhadijeh <feross@feross.org> <http://feross.org>
+ * @license  MIT
+ */
+
+// The _isBuffer check is for Safari 5-7 support, because it's missing
+// Object.prototype.constructor. Remove this eventually
+var index$7 = function (obj) {
+  return obj != null && (isBuffer(obj) || isSlowBuffer(obj) || !!obj._isBuffer)
+};
+
+function isBuffer (obj) {
+  return !!obj.constructor && typeof obj.constructor.isBuffer === 'function' && obj.constructor.isBuffer(obj)
+}
+
+// For Node v0.10 support. Remove this eventually.
+function isSlowBuffer (obj) {
+  return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
+}
+
+var toString = Object.prototype.toString;
+
+/**
+ * Get the native `typeof` a value.
+ *
+ * @param  {*} `val`
+ * @return {*} Native javascript type
+ */
+
+var index$5 = function kindOf(val) {
+  // primitivies
+  if (typeof val === 'undefined') {
+    return 'undefined';
+  }
+  if (val === null) {
+    return 'null';
+  }
+  if (val === true || val === false || val instanceof Boolean) {
+    return 'boolean';
+  }
+  if (typeof val === 'string' || val instanceof String) {
+    return 'string';
+  }
+  if (typeof val === 'number' || val instanceof Number) {
+    return 'number';
+  }
+
+  // functions
+  if (typeof val === 'function' || val instanceof Function) {
+    return 'function';
+  }
+
+  // array
+  if (typeof Array.isArray !== 'undefined' && Array.isArray(val)) {
+    return 'array';
+  }
+
+  // check for instances of RegExp and Date before calling `toString`
+  if (val instanceof RegExp) {
+    return 'regexp';
+  }
+  if (val instanceof Date) {
+    return 'date';
+  }
+
+  // other objects
+  var type = toString.call(val);
+
+  if (type === '[object RegExp]') {
+    return 'regexp';
+  }
+  if (type === '[object Date]') {
+    return 'date';
+  }
+  if (type === '[object Arguments]') {
+    return 'arguments';
+  }
+  if (type === '[object Error]') {
+    return 'error';
+  }
+
+  // buffer
+  if (typeof Buffer !== 'undefined' && index$7(val)) {
+    return 'buffer';
+  }
+
+  // es6: Map, WeakMap, Set, WeakSet
+  if (type === '[object Set]') {
+    return 'set';
+  }
+  if (type === '[object WeakSet]') {
+    return 'weakset';
+  }
+  if (type === '[object Map]') {
+    return 'map';
+  }
+  if (type === '[object WeakMap]') {
+    return 'weakmap';
+  }
+  if (type === '[object Symbol]') {
+    return 'symbol';
+  }
+
+  // typed arrays
+  if (type === '[object Int8Array]') {
+    return 'int8array';
+  }
+  if (type === '[object Uint8Array]') {
+    return 'uint8array';
+  }
+  if (type === '[object Uint8ClampedArray]') {
+    return 'uint8clampedarray';
+  }
+  if (type === '[object Int16Array]') {
+    return 'int16array';
+  }
+  if (type === '[object Uint16Array]') {
+    return 'uint16array';
+  }
+  if (type === '[object Int32Array]') {
+    return 'int32array';
+  }
+  if (type === '[object Uint32Array]') {
+    return 'uint32array';
+  }
+  if (type === '[object Float32Array]') {
+    return 'float32array';
+  }
+  if (type === '[object Float64Array]') {
+    return 'float64array';
+  }
+
+  // must be a plain object
+  return 'object';
+};
+
+function assign(target/*, objects*/) {
+  target = target || {};
+  var len = arguments.length, i = 0;
+  if (len === 1) {
+    return target;
+  }
+  while (++i < len) {
+    var val = arguments[i];
+    if (index$1(target)) {
+      target = val;
+    }
+    if (isObject(val)) {
+      extend(target, val);
+    }
+  }
+  return target;
+}
+
+/**
+ * Shallow extend
+ */
+
+function extend(target, obj) {
+  index$3(target, obj);
+
+  for (var key in obj) {
+    if (hasOwn(obj, key)) {
+      var val = obj[key];
+      if (isObject(val)) {
+        if (index$5(target[key]) === 'undefined' && index$5(val) === 'function') {
+          target[key] = val;
+        }
+        target[key] = assign(target[key] || {}, val);
+      } else {
+        target[key] = val;
+      }
+    }
+  }
+  return target;
+}
+
+/**
+ * Returns true if the object is a plain object or a function.
+ */
+
+function isObject(obj) {
+  return index$5(obj) === 'object' || index$5(obj) === 'function';
+}
+
+/**
+ * Returns true if the given `key` is an own property of `obj`.
+ */
+
+function hasOwn(obj, key) {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+/**
+ * Expose `assign`
+ */
+
+var index = assign;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
@@ -189,7 +440,7 @@ var Styled = (_temp = _class = function (_Component) {
       // all components accept a "style" prop for custom styletron attributes.
       // this overrides React's use of "style", as described above.
       //
-      styleObj = _merge({}, styleObj, this.props.style);
+      styleObj = index({}, styleObj, this.props.style);
 
       // lastly, middleware
       return this.context.themeProvider.applyMiddleware(styleObj);
@@ -258,7 +509,7 @@ function getDisplayName(Component$$1) {
   return Component$$1.displayName || Component$$1.name || (typeof Component$$1 === 'string' ? Component$$1 : 'Component');
 }
 
-function isObject(item) {
+function isObject$1(item) {
   return (typeof item === 'undefined' ? 'undefined' : _typeof(item)) === "object" && !Array.isArray(item) && item !== null;
 }
 
@@ -306,7 +557,7 @@ function classifyComponent(CustomComponent) {
           styletronObjects[_key2] = arguments[_key2];
         }
 
-        var allStyles = _merge.apply(undefined, [{}].concat(styletronObjects)),
+        var allStyles = index.apply(undefined, [{}].concat(styletronObjects)),
             themeProvider = _this.context.themeProvider;
 
         if (themeProvider) allStyles = themeProvider.applyMiddleware(allStyles);
@@ -370,7 +621,7 @@ function installLibraryMeta(t) {
 }
 
 function getDefaultTheme() {
-  return _merge({}, baseTheme, { meta: libraryMeta });
+  return index({}, baseTheme, { meta: libraryMeta });
 }
 
 /*
@@ -423,13 +674,13 @@ function styleDive(theme, styles, keyTester, valueMapper) {
 
   var clonedRoot = false,
       cloneNow = function cloneNow() {
-    if (!clonedRoot) styles = _merge({}, styles);
+    if (!clonedRoot) styles = index({}, styles);
     clonedRoot = true;
   };
 
   Object.keys(styles).forEach(function (key) {
 
-    if (isObject(styles[key])) {
+    if (isObject$1(styles[key])) {
       var _styleDive = styleDive(theme, styles[key], keyTester, valueMapper),
           clonedChild = _styleDive.cloned,
           childStyles = _styleDive.styles;
@@ -503,7 +754,7 @@ var ThemeProvider = (_temp$1 = _class$1 = function (_Component) {
 
     _this.installComponent = function (componentName, componentTheme) {
       if (_this.installedComponents.indexOf(componentName) === -1) {
-        _this.theme[componentName] = _merge({}, componentTheme, _this.theme[componentName]);
+        _this.theme[componentName] = index({}, componentTheme, _this.theme[componentName]);
         _this.installedComponents.push(componentName);
       }
     };
@@ -514,7 +765,7 @@ var ThemeProvider = (_temp$1 = _class$1 = function (_Component) {
       }, styleObj);
     };
 
-    _this.theme = _merge({}, getDefaultTheme(), props.theme);
+    _this.theme = index({}, getDefaultTheme(), props.theme);
     _this.middlewares = props.middlewares || [mapColorKeys];
     _this.installedComponents = [];
     return _this;

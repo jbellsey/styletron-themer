@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import assignDeep from 'assign-deep';
 import {isObject} from './utils';
 
 /*
@@ -55,7 +55,7 @@ function styleDive(theme, styles, keyTester, valueMapper) {
   let clonedRoot = false,
       cloneNow = () => {
         if (!clonedRoot)
-          styles = _.merge({}, styles);
+          styles = assignDeep({}, styles);
         clonedRoot = true;
       };
 

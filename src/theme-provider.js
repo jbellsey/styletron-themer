@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+import assignDeep from 'assign-deep';
+
 import getDefaultTheme from './default-theme';
 import * as availableMiddlewares from './middlewares';
 
@@ -38,7 +39,7 @@ export default class ThemeProvider extends Component {
     // a one-shot deal; we do not currently support dynamic themes, although that
     // would be easy to add in the future.
     //
-    this.theme               = _.merge({}, getDefaultTheme(), props.theme);
+    this.theme               = assignDeep({}, getDefaultTheme(), props.theme);
     this.middlewares         = props.middlewares || [availableMiddlewares.mapColorKeys];
     this.installedComponents = [];
   }
@@ -49,7 +50,7 @@ export default class ThemeProvider extends Component {
   //
   installComponent = (componentName, componentTheme) => {
     if (this.installedComponents.indexOf(componentName) === -1) {
-      this.theme[componentName] = _.merge({}, componentTheme, this.theme[componentName]);
+      this.theme[componentName] = assignDeep({}, componentTheme, this.theme[componentName]);
       this.installedComponents.push(componentName);
     }
   }

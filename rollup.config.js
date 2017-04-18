@@ -7,6 +7,7 @@ export default {
   plugins: [
     babel({
       "babelrc": false,
+      "exclude": 'node_modules/**',
       "presets": [
         ["es2015", {"modules": false}],
         "react",
@@ -19,15 +20,12 @@ export default {
       ]
     }),
     resolve({
-      extensions: [ '.js', '.json' ],
-      customResolveOptions: {
-        moduleDirectory: 'node_modules'
-      }
+      extensions: [ '.js', '.json' ]
     }),
     commonjs()
   ],
   // peer deps should not be embedded
-  external: id => id === 'prop-types' || /lodash/.test(id) || /^react/.test(id) || /^styletron/.test(id),
+  external: id => id === 'prop-types' || /^react/.test(id) || /^styletron/.test(id),
   targets: [{
     format: 'cjs',
     dest: 'dist/styletron-themer.cjs.js'

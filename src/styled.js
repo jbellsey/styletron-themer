@@ -1,6 +1,6 @@
 import {Component} from 'react';
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+import assignDeep from 'assign-deep';
 import {injectStylePrefixed} from 'styletron-utils';
 
 let unnamedCounter = 0;
@@ -94,7 +94,7 @@ class Styled extends Component {
     // all components accept a "style" prop for custom styletron attributes.
     // this overrides React's use of "style", as described above.
     //
-    styleObj = _.merge({}, styleObj, this.props.style);
+    styleObj = assignDeep({}, styleObj, this.props.style);
 
     // lastly, middleware
     return this.context.themeProvider.applyMiddleware(styleObj);

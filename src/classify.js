@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+import assignDeep from 'assign-deep';
 import {injectStylePrefixed} from 'styletron-utils';
 import {getDisplayName} from './utils';
 
@@ -46,7 +46,7 @@ export function classifyComponent(CustomComponent) {
     static displayName = `Classify_${getDisplayName(CustomComponent)}`;
 
     classifyStyles = (...styletronObjects) => {
-      let allStyles = _.merge({}, ...styletronObjects),
+      let allStyles = assignDeep({}, ...styletronObjects),
           {themeProvider} = this.context;
       if (themeProvider)
         allStyles = themeProvider.applyMiddleware(allStyles);
