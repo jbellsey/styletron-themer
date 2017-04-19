@@ -16,13 +16,12 @@ export {shallow};
 export function mount(
   node,
   theme = null,
-  {useMiddleware, enzymeOptions, styletron} = {}
+  {enzymeOptions, styletron} = {}
 ) {
 
-  const ourMiddlewares = useMiddleware ? [ThemeProvider.middlewares.mapColorKeys] : 0;
   return enzymeMount(
     <StyletronProvider styletron={styletron || new Styletron()}>
-      <ThemeProvider theme={theme} middlewares={ourMiddlewares}>
+      <ThemeProvider theme={theme}>
         {node}
       </ThemeProvider>
     </StyletronProvider>,

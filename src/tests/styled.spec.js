@@ -1,5 +1,5 @@
 import tape from 'blue-tape';
-import _ from 'lodash';
+import assignDeep from 'assign-deep';
 import React from 'react';
 import Styletron from 'styletron-server';   // we use the server package here
 import {mount} from './spec-helpers/helpers';
@@ -52,8 +52,25 @@ function dynamicStyle({componentTheme, props}) {
   if (layer !== undefined)
     instanceStyles.zIndex = layer;
 
-  const allStyles = _.merge({}, componentTheme, instanceStyles);
+  const allStyles = assignDeep({}, componentTheme, instanceStyles);
   anythingWatcher.invoke(allStyles, componentTheme);
+  return allStyles;
+}
+
+function dynamicStyleWithNoStatic({props}) {
+  const {size, layer} = props,
+        instanceStyles = {};
+
+  if (size === 'small')
+    instanceStyles.fontSize = '11px';
+  else if (size === 'large')
+    instanceStyles.fontSize = '55px';
+
+  if (layer !== undefined)
+    instanceStyles.zIndex = layer;
+
+  const allStyles = assignDeep({}, staticStyle, instanceStyles);
+  anythingWatcher.invoke(allStyles, staticStyle);
   return allStyles;
 }
 
@@ -92,6 +109,24 @@ class TestUnnamedFunctionComponent extends React.Component {
 }
 
 
+// what happens if the user doesn't provide a static style object? the component is
+// not themable, but it should work properly
+//
+class TestDynamicStylesOnly extends React.Component {
+  static propTypes = ourPropTypes;
+  render() {
+    return (
+      <Styled
+        dynamicStyle = {dynamicStyleWithNoStatic}
+        {...this.props}
+      >
+        {({className}) => <div className={className} {...this.props}>Test</div>}
+      </Styled>
+    );
+  }
+}
+
+
 
 //------ end test setup
 
@@ -102,6 +137,9 @@ const testSuites = {
   },
   unnamed: {
     Component: TestUnnamedFunctionComponent
+  },
+  dynamicOnly: {
+    Component: TestDynamicStylesOnly
   }
 };
 
@@ -193,7 +231,7 @@ function runTestSuite(componentType) {
               }
             };
 
-        mount(<ComponentUnderTest />, theme, {useMiddleware: true, styletron: localStyletron});
+        mount(<ComponentUnderTest />, theme, {styletron: localStyletron});
 
         const styles     = localStyletron.getCss(),
               shouldFind = ['border-color:#654321', 'background-color:rgba(44,33,22,0.11)'];
@@ -225,7 +263,7 @@ function runTestSuite(componentType) {
             };
 
         installLibraryMeta(libraryMeta);
-        mount(<ComponentUnderTest />, theme, {useMiddleware: true, styletron: localStyletron});
+        mount(<ComponentUnderTest />, theme, {styletron: localStyletron});
         installLibraryMeta({});   // (there is no automatic cleanup for this feature)
 
         const styles        = localStyletron.getCss(),

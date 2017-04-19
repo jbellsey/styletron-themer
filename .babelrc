@@ -5,7 +5,6 @@
     "react"
   ],
   "plugins": [
-    "transform-decorators-legacy",
-    "lodash"
+    "transform-decorators-legacy"
   ]
 }

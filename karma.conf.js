@@ -23,10 +23,7 @@ module.exports = function(config) {
       devtool:   'inline-source-map',
       plugins:   [],
       resolve:   {
-        extensions: ['.js'],
-        alias: {
-          sinon: 'sinon/pkg/sinon.js'   // see below
-        }
+        extensions: ['.js']
       },
       entry: './src',
       module:    {
@@ -37,12 +34,6 @@ module.exports = function(config) {
         }, {
           test:   /\.json$/,
           loader: 'json-loader'
-        }, {
-          // sinon magic from here: https://github.com/webpack/webpack/issues/304#issuecomment-172723408
-          // otherwise it breaks webpack requires
-          //
-          test:   /sinon\/pkg\/sinon\.js/,
-          loader: 'imports?define=>false,require=>false'
         }]
       },
       externals: {

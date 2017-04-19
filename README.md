@@ -7,7 +7,7 @@ official `styletron-react` package and expands upon them.
 ## Requirements
 
 You should be using React already. And if you're here,
-you're probably using Styltron to manage CSS in JavaScript.
+you're probably using Styletron to manage CSS in JavaScript.
 (If you're not, you should!)
 
 ## Documentation

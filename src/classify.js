@@ -18,17 +18,9 @@ import {getDisplayName} from './utils';
  *| }
  */
 
-// decorator. this is preferred over the HoC below.
-// example above.
+// can be used as a decorator or HoC
 //
-const classify = classifyComponent;
-export default classify;
-
-// standard HoC:
-//  class MyComponent {...}
-//  export classifyComponent(MyComponent)
-//
-export function classifyComponent(CustomComponent) {
+export default function classify(CustomComponent) {
 
   class ClassifiedComponent extends Component {
 

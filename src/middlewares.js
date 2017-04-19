@@ -22,9 +22,15 @@ function isKeyColorRelated(key) {
   return svgAttributes.concat(fullTextSearch).indexOf(key) !== -1;
 }
 
-function valueMapper(theme, key, value) {
+// mapping function should return undefined if no change
+//
+function colorValueMapper(theme, key, value) {
+  const colorMap = theme.meta.colors;
+  if (!colorMap)
+    return;
+
   // if the value is a simple match for an existing color, use it
-  let outputColor = theme.meta.colors[value];
+  let outputColor = colorMap[value];
   if (outputColor)
     return outputColor;
 
@@ -49,6 +55,7 @@ function valueMapper(theme, key, value) {
 
 // the heavy lifting is done here. this function doesn't know anything about
 // colors; the callbacks make this very reusable
+// TODO: expose this
 //
 function styleDive(theme, styles, keyTester, valueMapper) {
 
@@ -95,6 +102,6 @@ export function mapColorKeys(theme, styles) {
     theme,
     styles,
     isKeyColorRelated,
-    valueMapper.bind(null, theme)
+    colorValueMapper.bind(null, theme)
   ).styles;
 }

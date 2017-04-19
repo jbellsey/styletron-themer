@@ -15,8 +15,7 @@ export default {
       ],
       "plugins": [
         "transform-decorators-legacy",
-        "external-helpers",
-        "lodash"
+        "external-helpers"
       ]
     }),
     resolve({
