@@ -115,7 +115,15 @@ class Styled extends Component {
 
           // convert the style properties into a set of classes. this is where
           // we let styletron do its magic
-          styletronClasses = injectStylePrefixed(styletron, styleProperties);
+          styletronClasses = injectStylePrefixed(styletron, styleProperties),
+
+          paramBlock = {
+            // the base theme of your component
+            componentTheme: theme[this.componentName],
+
+            // the global meta (for colors, etc)
+            globalMeta: theme.meta
+          };
 
     // invoke the render callback with two params
     return children(
@@ -124,19 +132,11 @@ class Styled extends Component {
       // (see above for comments on the use of the className prop for legacy CSS classes)
       (className ? className + ' ' : '') + styletronClasses,
 
-      // PARAM 2: everything else, wrapped up into an object
-      {
-        // the base theme of your component
-        componentTheme: theme[this.componentName],
+      // PARAM 2: pass through props
+      passThroughProps,
 
-        // the global meta (for colors, etc)
-        globalMeta: theme.meta,
-
-        // give the children access to all props except those consumed here. useful for
-        // components that use render callbacks or have other prop-manipulations between
-        // the original element and the children (ohai React.cloneElement)
-        props: passThroughProps
-      }
+      // PARAM 3: everything else, wrapped up into an object
+      paramBlock
     );
   }
 }

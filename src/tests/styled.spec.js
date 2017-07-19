@@ -1,6 +1,7 @@
 import tape from 'blue-tape';
 import assignDeep from 'assign-deep';
 import React from 'react';
+import PropTypes from 'prop-types';
 import Styletron from 'styletron-server';   // we use the server package here
 import {mount} from './spec-helpers/helpers';
 import Styled from '../styled';
@@ -30,8 +31,8 @@ const anythingWatcher = {
 //
 
 const ourPropTypes = {
-  size:  React.PropTypes.oneOf(['small', 'large']),
-  layer: React.PropTypes.number
+  size:  PropTypes.oneOf(['small', 'large']),
+  layer: PropTypes.number
 };
 
 const staticStyle = {
@@ -84,7 +85,7 @@ class TestFunctionComponent extends React.Component {
         dynamicStyle = {dynamicStyle}
         {...this.props}
       >
-        {className => <div className={className} {...this.props}>Test</div>}
+        {(className, props) => <div className={className} {...props}>Test</div>}
       </Styled>
     );
   }
@@ -102,7 +103,7 @@ class TestUnnamedFunctionComponent extends React.Component {
         dynamicStyle = {dynamicStyle}
         {...this.props}
       >
-        {({className}) => <div className={className} {...this.props}>Test</div>}
+        {(className, props) => <div className={className} {...props}>Test</div>}
       </Styled>
     );
   }
@@ -120,7 +121,7 @@ class TestDynamicStylesOnly extends React.Component {
         dynamicStyle = {dynamicStyleWithNoStatic}
         {...this.props}
       >
-        {({className}) => <div className={className} {...this.props}>Test</div>}
+        {(className, props) => <div className={className} {...props}>Test</div>}
       </Styled>
     );
   }
@@ -148,9 +149,9 @@ const testSuites = {
 function runTestSuite(componentType) {
 
   const {
-    Component: ComponentUnderTest,
-    name:      componentName
-  } = testSuites[componentType];
+          Component: ComponentUnderTest,
+          name:      componentName
+        } = testSuites[componentType];
 
   tape(t => {
 
@@ -322,8 +323,8 @@ class TestRenderCallbackProps extends React.Component {
         dynamicStyle = {dynamicStyle}
         {...this.props}
       >
-        {(className, paramBlock) => {
-          anythingWatcher.invoke(paramBlock);
+        {(className, props, paramBlock) => {
+          anythingWatcher.invoke(props, paramBlock);
           return <div className={className} {...this.props}>Test</div>;
         }}
       </Styled>
@@ -335,24 +336,22 @@ tape.test('styled component passes all props to render callback', t => {
 
   let customProps = {
         id: '44',
-        'data-things': 'bonzo',
-        spotColor: 'red'
+        'data-things': 'bonzo'
       },
       receivedProps;
-  anythingWatcher.start(paramBlock => receivedProps = paramBlock.props);
+  anythingWatcher.start(props => {receivedProps = props;});
   mount(<TestRenderCallbackProps {...customProps} />);
   anythingWatcher.end();
 
   t.equal(receivedProps.id, customProps.id, 'render callback should receive full props object');
   t.equal(receivedProps['data-things'], customProps['data-things'], 'render callback should receive full props object');
-  t.equal(receivedProps.spotColor, customProps.spotColor, 'render callback should receive full props object');
   t.end();
 });
 
 tape.test('styled component passes component theme to render callback (not overridden)', t => {
 
   let receivedTheme;
-  anythingWatcher.start(paramBlock => receivedTheme = paramBlock.componentTheme);
+  anythingWatcher.start((props, paramBlock) => receivedTheme = paramBlock.componentTheme);
   mount(<TestRenderCallbackProps />);
   anythingWatcher.end();
 
@@ -371,7 +370,7 @@ tape.test('styled component passes component theme to render callback (with over
       },
       receivedTheme;
 
-  anythingWatcher.start(paramBlock => receivedTheme = paramBlock.componentTheme);
+  anythingWatcher.start((props, paramBlock) => receivedTheme = paramBlock.componentTheme);
   mount(<TestRenderCallbackProps />, userTheme);
   anythingWatcher.end();
 
@@ -396,7 +395,7 @@ tape.test('styled component passes global meta to render callback', t => {
       },
       receivedMeta;
 
-  anythingWatcher.start(paramBlock => receivedMeta = paramBlock.globalMeta);
+  anythingWatcher.start((props, paramBlock) => receivedMeta = paramBlock.globalMeta);
   mount(<TestRenderCallbackProps />, userTheme);
   anythingWatcher.end();
 

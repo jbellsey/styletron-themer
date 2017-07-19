@@ -137,7 +137,7 @@ var index$5 = function kindOf(val) {
   }
 
   // buffer
-  if (typeof Buffer !== 'undefined' && index$7(val)) {
+  if (index$7(val)) {
     return 'buffer';
   }
 
@@ -459,7 +459,14 @@ var Styled = (_temp = _class = function (_Component) {
           _context = this.context,
           styletron = _context.styletron,
           theme = _context.themeProvider.theme,
-          styletronClasses = injectStylePrefixed(styletron, styleProperties);
+          styletronClasses = injectStylePrefixed(styletron, styleProperties),
+          paramBlock = {
+        // the base theme of your component
+        componentTheme: theme[this.componentName],
+
+        // the global meta (for colors, etc)
+        globalMeta: theme.meta
+      };
 
       // invoke the render callback with two params
       return children(
@@ -468,19 +475,11 @@ var Styled = (_temp = _class = function (_Component) {
       // (see above for comments on the use of the className prop for legacy CSS classes)
       (className ? className + ' ' : '') + styletronClasses,
 
-      // PARAM 2: everything else, wrapped up into an object
-      {
-        // the base theme of your component
-        componentTheme: theme[this.componentName],
+      // PARAM 2: pass through props
+      passThroughProps,
 
-        // the global meta (for colors, etc)
-        globalMeta: theme.meta,
-
-        // give the children access to all props except those consumed here. useful for
-        // components that use render callbacks or have other prop-manipulations between
-        // the original element and the children (ohai React.cloneElement)
-        props: passThroughProps
-      });
+      // PARAM 3: everything else, wrapped up into an object
+      paramBlock);
     }
   }]);
   return Styled;
