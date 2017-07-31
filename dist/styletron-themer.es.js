@@ -708,6 +708,9 @@ var ThemeProvider = (_temp$1 = _class$1 = function (_Component) {
   inherits(ThemeProvider, _Component);
   createClass(ThemeProvider, [{
     key: 'getChildContext',
+
+
+    // pass these down on context
     value: function getChildContext() {
       return {
         themeProvider: {
@@ -719,7 +722,7 @@ var ThemeProvider = (_temp$1 = _class$1 = function (_Component) {
       };
     }
 
-    // pass these down on context
+    // we pull context from above (for nested themes)
 
   }]);
 
@@ -745,7 +748,10 @@ var ThemeProvider = (_temp$1 = _class$1 = function (_Component) {
       }, styleObj);
     };
 
-    _this.theme = index({}, getDefaultTheme(), props.theme);
+    var _ref = (context || {}).themeProvider || {},
+        parentTheme = _ref.theme;
+
+    _this.theme = index({}, getDefaultTheme(), parentTheme, props.theme);
     _this.middlewares = props.middlewares || [mapColorKeys];
     _this.installedComponents = [];
     return _this;
@@ -775,6 +781,10 @@ var ThemeProvider = (_temp$1 = _class$1 = function (_Component) {
     middlewares: PropTypes.array,
     installComponent: PropTypes.func,
     applyMiddleware: PropTypes.func
+  })
+}, _class$1.contextTypes = {
+  themeProvider: PropTypes.shape({
+    theme: PropTypes.object.isRequired
   })
 }, _temp$1);
 

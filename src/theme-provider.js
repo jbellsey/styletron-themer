@@ -21,6 +21,13 @@ export default class ThemeProvider extends Component {
     })
   };
 
+  // we pull context from above (for nested themes)
+  static contextTypes = {
+    themeProvider: PropTypes.shape({
+      theme: PropTypes.object.isRequired
+    })
+  };
+
   getChildContext() {
     return {
       themeProvider: {
@@ -39,7 +46,8 @@ export default class ThemeProvider extends Component {
     // a one-shot deal; we do not currently support dynamic themes, although that
     // would be easy to add in the future.
     //
-    this.theme               = assignDeep({}, getDefaultTheme(), props.theme);
+    const {theme: parentTheme} = (context || {}).themeProvider || {};
+    this.theme               = assignDeep({}, getDefaultTheme(), parentTheme, props.theme);
     this.middlewares         = props.middlewares || [availableMiddlewares.mapColorKeys];
     this.installedComponents = [];
   }
