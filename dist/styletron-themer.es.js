@@ -447,11 +447,6 @@ var Styled = (_temp = _class = function (_Component) {
       // middleware
       styleObj = this.context.themeProvider.applyMiddleware(styleObj);
 
-      // strip out the "meta" key. styletron currently ignores it, but better safe!
-      // also, this requires that we're operating on a copy. can't delete from the
-      // main component theme.
-      //
-      delete styleObj.meta;
       return styleObj;
     }
   }, {
