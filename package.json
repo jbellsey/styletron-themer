@@ -1,6 +1,6 @@
 {
   "name": "styletron-themer",
-  "version": "0.9.3",
+  "version": "0.10.0",
   "description": "Themable component-building tool for Styletron & React",
   "keywords": [
     "Styletron",
@@ -30,7 +30,7 @@
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-eslint": "^7.2.2",
-    "babel-loader": "^6.4.1",
+    "babel-loader": "^7.1.1",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-preset-env": "^1.4.0",
@@ -40,9 +40,9 @@
     "babel-preset-stage-1": "^6.24.1",
     "blue-tape": "^1.0.0",
     "enzyme": "^2.8.2",
-    "eslint": "^3.19.0",
-    "eslint-config-babel": "^6.0.0",
-    "eslint-plugin-react": "^6.10.3",
+    "eslint": "^4.4.1",
+    "eslint-config-babel": "^7.0.2",
+    "eslint-plugin-react": "^7.1.0",
     "eslint-plugin-standard": "^3.0.1",
     "faucet": "0.0.1",
     "karma": "^1.6.0",
@@ -56,14 +56,14 @@
     "react": "^15",
     "react-addons-test-utils": "^15.5.1",
     "react-dom": "^15",
-    "rollup": "^0.41.6",
-    "rollup-plugin-babel": "^2.7.1",
-    "rollup-plugin-commonjs": "^8.0.2",
+    "rollup": "^0.45.2",
+    "rollup-plugin-babel": "^3.0.1",
+    "rollup-plugin-commonjs": "^8.1",
     "rollup-plugin-node-resolve": "^3.0.0",
     "styletron": "^2.5",
     "styletron-react": "^2.5.5",
     "styletron-utils": "^2.5",
-    "webpack": "^2.4"
+    "webpack": "^3.5"
   },
   "peerDependencies": {
     "prop-types": "^15.5",
@@ -71,6 +71,6 @@
     "styletron-utils": "^2.5"
   },
   "dependencies": {
-    "assign-deep": "^0.4.5"
+    "assign-deep": "^0.4"
   }
 }

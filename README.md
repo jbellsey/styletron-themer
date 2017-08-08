@@ -37,7 +37,7 @@ npm run test
 ```
 
 The files in the `dist` directory are built and committed to git.
-They are generated with babel, using the following script:
+They are generated with rollup, using the following script:
 
 ```bash
 npm run build

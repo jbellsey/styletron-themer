@@ -43,8 +43,8 @@ export default class ThemeProvider extends Component {
     super(props, context);
 
     // do a deep merge with the library theme and the user's overrides. theming is
-    // a one-shot deal; we do not currently support dynamic themes, although that
-    // would be easy to add in the future.
+    // a one-shot deal; we do not currently support dynamic themes (i.e., if you
+    // change the theme prop, nothing will change)
     //
     const {theme: parentTheme} = (context || {}).themeProvider || {};
     this.theme               = assignDeep({}, getDefaultTheme(), parentTheme, props.theme);
@@ -71,9 +71,6 @@ export default class ThemeProvider extends Component {
       );
   }
 
-  // TODO: add a componentWillReceiveProps hook, which will allow the user to
-  // change the theme on the fly
-
   render() {
     return React.Children.only(this.props.children);
   }
@@ -86,7 +83,7 @@ export default class ThemeProvider extends Component {
  */
 ThemeProvider.propTypes = {
   theme:       PropTypes.object,
-  middlewares: PropTypes.array
+  middlewares: PropTypes.arrayOf(PropTypes.func)
 };
 
 // provided as a convenient export for consumers. it is not

@@ -7,7 +7,8 @@ import {getDisplayName} from './utils';
 /**
  * the classify decorator is used by APPLICATION authors more than component authors.
  * it provides a "classify" function as a prop. this can be used to put styles
- * directly into HTML elements or other components that were not created with <Styled>
+ * directly into HTML elements or other components that were not created with <Styled>.
+ * this is an escape hatch that library authors should do their best to make unnecessary.
  *
  * @example
  *| @classify
