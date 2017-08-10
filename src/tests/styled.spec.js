@@ -81,7 +81,7 @@ class TestFunctionComponent extends React.Component {
   render() {
     return (
       <Styled
-        name         = {this.constructor.name}
+        themeName    = {this.constructor.name}
         staticStyle  = {staticStyle}
         dynamicStyle = {dynamicStyle}
         {...this.props}
@@ -341,7 +341,7 @@ class TestRenderCallbackProps extends React.Component {
   render() {
     return (
       <Styled
-        name         = 'TestRenderCallbackProps'
+        themeName    = 'TestRenderCallbackProps'
         staticStyle  = {staticStyle}
         dynamicStyle = {dynamicStyle}
         {...this.props}

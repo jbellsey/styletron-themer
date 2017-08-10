@@ -381,12 +381,12 @@ var Styled = (_temp = _class = function (_Component) {
       console.error('Styled components must be rendered inside a ThemeProvider.'); // eslint-disable-line
     }
 
-    _this.componentName = props.name;
+    _this.componentName = props.themeName || props.name;
 
     // ensure that the component's static style is inserted into the master theme.
     // unnamed components are not installed into the theme
     //
-    if (_this.componentName) context.themeProvider.installComponent(props.name, props.staticStyle || {});else _this.componentName = 'Unnamd_' + unnamedCounter++; // guaranteed to not be a legit component name in the theme
+    if (_this.componentName) context.themeProvider.installComponent(_this.componentName, props.staticStyle || {});else _this.componentName = 'Unnamd_' + unnamedCounter++; // guaranteed to not be a legit component name in the theme
     return _this;
   }
 
@@ -454,10 +454,11 @@ var Styled = (_temp = _class = function (_Component) {
           className = _props.className,
           children = _props.children,
           name = _props.name,
+          themeName = _props.themeName,
           staticStyle = _props.staticStyle,
           dynamicStyle = _props.dynamicStyle,
           style = _props.style,
-          passThroughProps = objectWithoutProperties(_props, ['className', 'children', 'name', 'staticStyle', 'dynamicStyle', 'style']),
+          passThroughProps = objectWithoutProperties(_props, ['className', 'children', 'name', 'themeName', 'staticStyle', 'dynamicStyle', 'style']),
           _context = this.context,
           styletron = _context.styletron,
           theme = _context.themeProvider.theme,
@@ -498,9 +499,12 @@ var Styled = (_temp = _class = function (_Component) {
   }).isRequired
 }, _class.propTypes = {
   // basic props
-  name: PropTypes.string, // unnamed components are not themeable; useful for one-offs
+  themeName: PropTypes.string, // unnamed components are not themeable; useful for one-offs
   staticStyle: PropTypes.object,
   dynamicStyle: PropTypes.func,
+
+  // DEPRECATED; will be removed very quickly
+  name: PropTypes.string,
 
   // for per-instance styling
   className: PropTypes.string,

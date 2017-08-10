@@ -37,9 +37,12 @@ export default class Styled extends Component {
 
   static propTypes = {
     // basic props
-    name:         PropTypes.string,   // unnamed components are not themeable; useful for one-offs
+    themeName:    PropTypes.string,   // unnamed components are not themeable; useful for one-offs
     staticStyle:  PropTypes.object,
     dynamicStyle: PropTypes.func,
+
+    // DEPRECATED; will be removed very quickly
+    name:         PropTypes.string,
 
     // for per-instance styling
     className:    PropTypes.string,
@@ -56,13 +59,13 @@ export default class Styled extends Component {
       console.error('Styled components must be rendered inside a ThemeProvider.');  // eslint-disable-line
     }
 
-    this.componentName = props.name;
+    this.componentName = props.themeName || props.name;
 
     // ensure that the component's static style is inserted into the master theme.
     // unnamed components are not installed into the theme
     //
     if (this.componentName)
-      context.themeProvider.installComponent(props.name, props.staticStyle || {});
+      context.themeProvider.installComponent(this.componentName, props.staticStyle || {});
     else
       this.componentName = `Unnamd_${unnamedCounter++}`;   // guaranteed to not be a legit component name in the theme
   }
@@ -113,7 +116,7 @@ export default class Styled extends Component {
 
   render() {
     const styleProperties = this.getStyle(),
-          {className, children, name, staticStyle, dynamicStyle, style, ...passThroughProps} = this.props,    // eslint-disable-line
+          {className, children, name, themeName, staticStyle, dynamicStyle, style, ...passThroughProps} = this.props,    // eslint-disable-line
           {styletron, themeProvider: {theme}} = this.context,
 
           // convert the style properties into a set of classes. this is where
