@@ -36,9 +36,10 @@ const ourPropTypes = {
 };
 
 const staticStyle = {
-  fontSize: '33px',
-  zIndex:   '333',
-  color:    null    // see below
+  fontSize:   '33px',
+  zIndex:     '333',
+  fontWeight: '700',
+  color:      null    // see below
 };
 
 function dynamicStyle({componentTheme, props}) {
@@ -109,7 +110,6 @@ class TestUnnamedFunctionComponent extends React.Component {
   }
 }
 
-
 // what happens if the user doesn't provide a static style object? the component is
 // not themable, but it should work properly
 //
@@ -119,6 +119,20 @@ class TestDynamicStylesOnly extends React.Component {
     return (
       <Styled
         dynamicStyle = {dynamicStyleWithNoStatic}
+        {...this.props}
+      >
+        {(className, props) => <div className={className} {...props}>Test</div>}
+      </Styled>
+    );
+  }
+}
+
+class TestStaticStylesOnly extends React.Component {
+  static propTypes = ourPropTypes;
+  render() {
+    return (
+      <Styled
+        staticStyle = {staticStyle}
         {...this.props}
       >
         {(className, props) => <div className={className} {...props}>Test</div>}
@@ -141,6 +155,10 @@ const testSuites = {
   },
   dynamicOnly: {
     Component: TestDynamicStylesOnly
+  },
+  staticOnly: {
+    Component: TestStaticStylesOnly,
+    staticOnly: true
   }
 };
 
@@ -148,12 +166,17 @@ const testSuites = {
 //
 function runTestSuite(componentType) {
 
-  const {
-          Component: ComponentUnderTest,
-          name:      componentName
-        } = testSuites[componentType];
-
   tape(t => {
+
+    const {
+            Component: ComponentUnderTest,
+            name:      componentName,
+            staticOnly = true
+          } = testSuites[componentType];
+
+    const maybeTest = (condition, ...testArgs) => condition && t.test(...testArgs);
+
+    //--------------
 
     t.test(`Styled component passes through custom attributes (type: ${componentType})`, t => {
       let c = mount(<ComponentUnderTest id="test-id" data-peanut-butter="crunchy" />).getDOMNode();
@@ -163,17 +186,20 @@ function runTestSuite(componentType) {
     });
 
     t.test(`Styled component processes default styles without a theme (type: ${componentType})`, t => {
-      let fontSize = null;
+      let localStyletron = new Styletron();
 
-      anythingWatcher.start(allStyles => {fontSize = allStyles.fontSize;});
-      mount(<ComponentUnderTest />);
-      anythingWatcher.end();
+      mount(<ComponentUnderTest />, null, {styletron: localStyletron});
 
-      t.plan(1);
-      t.equal(fontSize, '33px', 'Styled component should pass default attributes to the component');
+      const styles     = localStyletron.getCss(),
+            shouldFind = ['font-size:33px'];
+
+      shouldFind.forEach(oneNeedle => {
+        t.equal(styles.indexOf(oneNeedle) >= 0, true, 'default component styles should be applied');
+      });
+      t.end();
     });
 
-    t.test(`Styled component adapts to props correctly (type: ${componentType})`, t => {
+    maybeTest(!staticOnly, `Styled component adapts to props correctly (type: ${componentType})`, t => {
       let fontSize = null;
 
       t.plan(2);
@@ -188,98 +214,95 @@ function runTestSuite(componentType) {
       anythingWatcher.end();
     });
 
-    // these tests do not apply to unnamed components
-    if (componentName) {
-      t.test(`Styled component lets the user override default styles in the theme (type: ${componentType})`, t => {
-        let fontSize = null,
-            zIndex   = null,
-            color    = null,
-            theme = {
-              [componentName]: {
-                fontSize: '99px',
-                zIndex:   '999',
-                color:    'red'     // a new property, not in the component
-              }
-            };
+    maybeTest(componentName, `Styled component lets the user override default styles in the theme (type: ${componentType})`, t => {
+      let fontSize = null,
+          zIndex   = null,
+          color    = null,
+          theme = {
+            [componentName]: {
+              fontSize: '99px',
+              zIndex:   '999',
+              color:    'red'     // a new property, not in the component
+            }
+          };
 
-        anythingWatcher.start(allStyles => {
-          fontSize = allStyles.fontSize;
-          zIndex   = allStyles.zIndex;
-          color    = allStyles.color;
-        });
-        mount(<ComponentUnderTest />, theme);
-        anythingWatcher.end();
-
-        t.plan(3);
-        t.equal(fontSize, '99px', 'Styled component should use style values from the theme when applicable');
-        t.equal(zIndex,   '999',  'Styled component should use style values from the theme when applicable');
-        t.equal(color,    'red',  'Styled component should use style values from the theme when applicable');
+      anythingWatcher.start(allStyles => {
+        fontSize = allStyles.fontSize;
+        zIndex   = allStyles.zIndex;
+        color    = allStyles.color;
       });
+      mount(<ComponentUnderTest />, theme);
+      anythingWatcher.end();
 
-      t.test(`Styled component applies middleware correctly (type: ${componentType})`, t => {
-        let localStyletron = new Styletron(),
-            theme = {
-              meta: {
-                colors: {
-                  // custom named colors
-                  'crunchy':  '#654321',
-                  'kool-aid': 'rgba(44,33,22,0.11)'
-                }
-              },
-              [componentName]: {
-                borderColor:     'crunchy',
-                backgroundColor: 'kool-aid'
-              }
-            };
+      t.plan(3);
+      t.equal(fontSize, '99px', 'Styled component should use style values from the theme when applicable');
+      t.equal(zIndex,   '999',  'Styled component should use style values from the theme when applicable');
+      t.equal(color,    'red',  'Styled component should use style values from the theme when applicable');
+    });
 
-        mount(<ComponentUnderTest />, theme, {styletron: localStyletron});
-
-        const styles     = localStyletron.getCss(),
-              shouldFind = ['border-color:#654321', 'background-color:rgba(44,33,22,0.11)'];
-
-        t.plan(shouldFind.length);
-        shouldFind.forEach(oneNeedle => {
-          t.equal(styles.indexOf(oneNeedle) >= 0, true, 'middleware should be applied');
-        });
-      });
-
-      t.test(`Styled component lets the library install its own meta (type: ${componentType})`, t => {
-        let localStyletron = new Styletron(),
-            libraryMeta = {     // library meta overrides the default theme
+    maybeTest(componentName, `Styled component applies middleware correctly (type: ${componentType})`, t => {
+      let localStyletron = new Styletron(),
+          theme = {
+            meta: {
               colors: {
-                chilly: 'library-chilly',
-                sweaty: 'library-sweaty'
+                // custom named colors
+                'crunchy':  '#654321',
+                'kool-aid': 'rgba(44,33,22,0.11)'
               }
             },
-            theme = {           // the user theme overrides the library meta when there are collisions
-              meta: {
-                colors: {
-                  chilly: 'usertheme-chilly'
-                }
-              },
-              [componentName]: {  // default theme
-                borderColor:     'chilly',
-                backgroundColor: 'sweaty'
-              }
-            };
+            [componentName]: {
+              borderColor:     'crunchy',
+              backgroundColor: 'kool-aid'
+            }
+          };
 
-        installLibraryMeta(libraryMeta);
-        mount(<ComponentUnderTest />, theme, {styletron: localStyletron});
-        installLibraryMeta({});   // (there is no automatic cleanup for this feature)
+      mount(<ComponentUnderTest />, theme, {styletron: localStyletron});
 
-        const styles        = localStyletron.getCss(),
-              shouldFind    = ['border-color:usertheme-chilly', 'background-color:library-sweaty'],
-              shouldNotFind = ['border-color:library-chilly', 'background-color:usertheme-sweaty'];
+      const styles     = localStyletron.getCss(),
+            shouldFind = ['border-color:#654321', 'background-color:rgba(44,33,22,0.11)'];
 
-        t.plan(shouldFind.length + shouldNotFind.length);
-        shouldFind.forEach(oneNeedle => {
-          t.equal(styles.indexOf(oneNeedle) >= 0, true, 'library meta should be applied before the user theme');
-        });
-        shouldNotFind.forEach(oneAbsentNeedle => {
-          t.equal(styles.indexOf(oneAbsentNeedle) >= 0, false, 'user theme should override library meta');
-        });
+      t.plan(shouldFind.length);
+      shouldFind.forEach(oneNeedle => {
+        t.equal(styles.indexOf(oneNeedle) >= 0, true, 'middleware should be applied');
       });
-    }
+    });
+
+    maybeTest(componentName, `Styled component lets the library install its own meta (type: ${componentType})`, t => {
+      let localStyletron = new Styletron(),
+          libraryMeta = {     // library meta overrides the default theme
+            colors: {
+              chilly: 'library-chilly',
+              sweaty: 'library-sweaty'
+            }
+          },
+          theme = {           // the user theme overrides the library meta when there are collisions
+            meta: {
+              colors: {
+                chilly: 'usertheme-chilly'
+              }
+            },
+            [componentName]: {  // default theme
+              borderColor:     'chilly',
+              backgroundColor: 'sweaty'
+            }
+          };
+
+      installLibraryMeta(libraryMeta);
+      mount(<ComponentUnderTest />, theme, {styletron: localStyletron});
+      installLibraryMeta({});   // (there is no automatic cleanup for this feature)
+
+      const styles        = localStyletron.getCss(),
+            shouldFind    = ['border-color:usertheme-chilly', 'background-color:library-sweaty'],
+            shouldNotFind = ['border-color:library-chilly', 'background-color:usertheme-sweaty'];
+
+      t.plan(shouldFind.length + shouldNotFind.length);
+      shouldFind.forEach(oneNeedle => {
+        t.equal(styles.indexOf(oneNeedle) >= 0, true, 'library meta should be applied before the user theme');
+      });
+      shouldNotFind.forEach(oneAbsentNeedle => {
+        t.equal(styles.indexOf(oneAbsentNeedle) >= 0, false, 'user theme should override library meta');
+      });
+    });
 
     t.test(`Styled component lets the user override default styles per component with inline styles (type: ${componentType})`, t => {
       let localStyletron = new Styletron(),
@@ -292,7 +315,7 @@ function runTestSuite(componentType) {
       mount(<ComponentUnderTest style={customStyles} />, null, {styletron: localStyletron});
 
       const styles        = localStyletron.getCss(),
-            shouldFind    = ['color:lime', 'font-size:88px', 'z-index:888'],
+            shouldFind    = ['color:lime', 'font-size:88px', 'z-index:888', 'font-weight:700'],
             shouldNotFind = ['font-size:33px', 'z-index:333'];
 
       t.plan(shouldFind.length + shouldNotFind.length);

@@ -393,7 +393,7 @@ var Styled = (_temp = _class = function (_Component) {
     // ensure that the component's static style is inserted into the master theme.
     // unnamed components are not installed into the theme
     //
-    if (_this.componentName) context.themeProvider.installComponent(props.name, props.staticStyle);else _this.componentName = 'Unnamd_' + unnamedCounter++; // guaranteed to not be a legit component name in the theme
+    if (_this.componentName) context.themeProvider.installComponent(props.name, props.staticStyle || {});else _this.componentName = 'Unnamd_' + unnamedCounter++; // guaranteed to not be a legit component name in the theme
     return _this;
   }
 
@@ -447,9 +447,6 @@ var Styled = (_temp = _class = function (_Component) {
       // this overrides React's use of "style", as described above.
       //
       if (this.props.style) styleObj = index({}, styleObj, this.props.style);
-
-      // fallback: if the user doesn't give us a dynamic styling function, use the static style
-      if (!styleObj) styleObj = index({}, componentTheme);
 
       // middleware
       styleObj = this.context.themeProvider.applyMiddleware(styleObj);

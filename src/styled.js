@@ -62,7 +62,7 @@ export default class Styled extends Component {
     // unnamed components are not installed into the theme
     //
     if (this.componentName)
-      context.themeProvider.installComponent(props.name, props.staticStyle);
+      context.themeProvider.installComponent(props.name, props.staticStyle || {});
     else
       this.componentName = `Unnamd_${unnamedCounter++}`;   // guaranteed to not be a legit component name in the theme
   }
@@ -104,10 +104,6 @@ export default class Styled extends Component {
     //
     if (this.props.style)
       styleObj = assignDeep({}, styleObj, this.props.style);
-
-    // fallback: if the user doesn't give us a dynamic styling function, use the static style
-    if (!styleObj)
-      styleObj = assignDeep({}, componentTheme);
 
     // middleware
     styleObj = this.context.themeProvider.applyMiddleware(styleObj);
