@@ -441,7 +441,7 @@ var Styled = (_temp = _class = function (_Component) {
           // last, but not least, the props
           props: this.props
         });
-      }
+      } else styleObj = componentTheme;
 
       // all components accept a "style" prop for custom styletron attributes.
       // this overrides React's use of "style", as described above.

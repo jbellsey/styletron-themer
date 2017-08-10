@@ -96,6 +96,8 @@ export default class Styled extends Component {
         props: this.props
       });
     }
+    else
+      styleObj = componentTheme;
 
     // all components accept a "style" prop for custom styletron attributes.
     // this overrides React's use of "style", as described above.
