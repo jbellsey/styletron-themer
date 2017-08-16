@@ -13,7 +13,7 @@ const dynamicStyleWatcher = renderWatcher => ({componentTheme}) => {
 
 const Test1 = () => (
   <Styled
-    name        = "Test1"
+    themeName   = "Test1"
     staticStyle = {{color: 'blue'}}
   >
     {() => <div />}
@@ -22,7 +22,7 @@ const Test1 = () => (
 
 const Test2 = () => (
   <Styled
-    name        = "Test2"
+    themeName   = "Test2"
     staticStyle = {{color: 'green', meta: {charles: 'in charge'}}}
   >
     {() => <div />}
@@ -31,7 +31,7 @@ const Test2 = () => (
 
 const Test3 = ({renderWatcher}) => (
   <Styled
-    name         = "Test3"
+    themeName    = "Test3"
     staticStyle  = {{color: 'blue', outline: '2px dotted red'}}
     dynamicStyle = {dynamicStyleWatcher(renderWatcher)}
   >
@@ -42,7 +42,7 @@ const Test3 = ({renderWatcher}) => (
 // transfers a prop up to the theme
 const TestThemeTransfer = ({staticStyle}) => (
   <Styled
-    name        = "TestThemeTransfer"
+    themeName   = "TestThemeTransfer"
     staticStyle = {staticStyle}
   >
     {() => <div />}

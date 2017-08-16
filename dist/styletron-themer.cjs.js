@@ -373,8 +373,6 @@ var possibleConstructorReturn = function (self, call) {
 var _class;
 var _temp;
 
-var unnamedCounter = 0;
-
 var Styled = (_temp = _class = function (_Component) {
   inherits(Styled, _Component);
 
@@ -388,19 +386,14 @@ var Styled = (_temp = _class = function (_Component) {
       console.error('Styled components must be rendered inside a ThemeProvider.'); // eslint-disable-line
     }
 
-    _this.componentName = props.themeName || props.name;
+    _this.componentName = props.themeName;
 
     // ensure that the component's static style is inserted into the master theme.
-    // unnamed components are not installed into the theme
+    // unnamed components are not installed into the theme; see getComponentTheme() below
     //
-    if (_this.componentName) context.themeProvider.installComponent(_this.componentName, props.staticStyle || {});else _this.componentName = 'Unnamd_' + unnamedCounter++; // guaranteed to not be a legit component name in the theme
+    if (_this.componentName) context.themeProvider.installComponent(_this.componentName, props.staticStyle || {});
     return _this;
   }
-
-  // this is where the magic happens. here we figure out what styles need to be applied
-  // to this instance of the component. returns an object of styletron attributes (not classes)
-  //
-
 
   /*
    every styled component can take two props which allow you to override
@@ -415,15 +408,23 @@ var Styled = (_temp = _class = function (_Component) {
   */
 
   createClass(Styled, [{
+    key: 'getComponentTheme',
+    value: function getComponentTheme() {
+      var theme = this.componentName ? this.context.themeProvider.theme[this.componentName] : this.props.staticStyle; // for unthemed (unnamed) components
+      return theme || {};
+    }
+
+    // this is where the magic happens. here we figure out what styles need to be applied
+    // to this instance of the component. returns an object of styletron attributes (not classes)
+    //
+
+  }, {
     key: 'getStyle',
     value: function getStyle() {
       var
       // the theme is stored on context
       masterTheme = this.context.themeProvider.theme,
-
-
-      // the theme for this component only. the fallback is needed for unnamed (unthemed) components
-      componentTheme = masterTheme[this.componentName] || this.props.staticStyle,
+          componentTheme = this.getComponentTheme(),
           styleObj = void 0;
 
       // use the component's dynamic styling function to adjust the styles for this instance
@@ -460,19 +461,18 @@ var Styled = (_temp = _class = function (_Component) {
           _props = this.props,
           className = _props.className,
           children = _props.children,
-          name = _props.name,
           themeName = _props.themeName,
           staticStyle = _props.staticStyle,
           dynamicStyle = _props.dynamicStyle,
           style = _props.style,
-          passThroughProps = objectWithoutProperties(_props, ['className', 'children', 'name', 'themeName', 'staticStyle', 'dynamicStyle', 'style']),
+          passThroughProps = objectWithoutProperties(_props, ['className', 'children', 'themeName', 'staticStyle', 'dynamicStyle', 'style']),
           _context = this.context,
           styletron = _context.styletron,
           theme = _context.themeProvider.theme,
           styletronClasses = styletronUtils.injectStylePrefixed(styletron, styleProperties),
           paramBlock = {
         // the base theme of your component
-        componentTheme: theme[this.componentName],
+        componentTheme: this.getComponentTheme(),
 
         // the global meta (for colors, etc)
         globalMeta: theme.meta
@@ -509,9 +509,6 @@ var Styled = (_temp = _class = function (_Component) {
   themeName: PropTypes.string, // unnamed components are not themeable; useful for one-offs
   staticStyle: PropTypes.object,
   dynamicStyle: PropTypes.func,
-
-  // DEPRECATED; will be removed very quickly
-  name: PropTypes.string,
 
   // for per-instance styling
   className: PropTypes.string,

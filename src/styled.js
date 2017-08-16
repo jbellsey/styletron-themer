@@ -3,8 +3,6 @@ import PropTypes from 'prop-types';
 import assignDeep from 'assign-deep';
 import {injectStylePrefixed} from 'styletron-utils';
 
-let unnamedCounter = 0;
-
 export default class Styled extends Component {
 
   // we pull context from above
@@ -41,9 +39,6 @@ export default class Styled extends Component {
     staticStyle:  PropTypes.object,
     dynamicStyle: PropTypes.func,
 
-    // DEPRECATED; will be removed very quickly
-    name:         PropTypes.string,
-
     // for per-instance styling
     className:    PropTypes.string,
     style:        PropTypes.object,
@@ -59,15 +54,20 @@ export default class Styled extends Component {
       console.error('Styled components must be rendered inside a ThemeProvider.');  // eslint-disable-line
     }
 
-    this.componentName = props.themeName || props.name;
+    this.componentName = props.themeName;
 
     // ensure that the component's static style is inserted into the master theme.
-    // unnamed components are not installed into the theme
+    // unnamed components are not installed into the theme; see getComponentTheme() below
     //
     if (this.componentName)
       context.themeProvider.installComponent(this.componentName, props.staticStyle || {});
-    else
-      this.componentName = `Unnamd_${unnamedCounter++}`;   // guaranteed to not be a legit component name in the theme
+  }
+
+  getComponentTheme() {
+    let theme = this.componentName
+      ? this.context.themeProvider.theme[this.componentName]
+      : this.props.staticStyle;   // for unthemed (unnamed) components
+    return theme || {};
   }
 
   // this is where the magic happens. here we figure out what styles need to be applied
@@ -78,8 +78,7 @@ export default class Styled extends Component {
       // the theme is stored on context
       masterTheme = this.context.themeProvider.theme,
 
-      // the theme for this component only. the fallback is needed for unnamed (unthemed) components
-      componentTheme = masterTheme[this.componentName] || this.props.staticStyle,
+      componentTheme = this.getComponentTheme(),
 
       styleObj;
 
@@ -116,7 +115,7 @@ export default class Styled extends Component {
 
   render() {
     const styleProperties = this.getStyle(),
-          {className, children, name, themeName, staticStyle, dynamicStyle, style, ...passThroughProps} = this.props,    // eslint-disable-line
+          {className, children, themeName, staticStyle, dynamicStyle, style, ...passThroughProps} = this.props,    // eslint-disable-line
           {styletron, themeProvider: {theme}} = this.context,
 
           // convert the style properties into a set of classes. this is where
@@ -125,7 +124,7 @@ export default class Styled extends Component {
 
           paramBlock = {
             // the base theme of your component
-            componentTheme: theme[this.componentName],
+            componentTheme: this.getComponentTheme(),
 
             // the global meta (for colors, etc)
             globalMeta: theme.meta
