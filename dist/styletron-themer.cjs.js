@@ -623,7 +623,8 @@ function getDefaultTheme() {
   it simply provides a single middleware tool for color mapping.
 */
 
-var fullTextSearch = ['background', 'border', 'borderColor', 'outline'];
+var fullTextSearch = ['background', 'border', 'outline'];
+var contains = ['border', 'background', 'outline', 'hadow'];
 var svgAttributes = ['stroke', 'fill'];
 
 function isKeyColorRelated(key) {
@@ -632,6 +633,11 @@ function isKeyColorRelated(key) {
   // look for "olor", which is a safe search (i.e., there are no false positives)
   //
   if (key.indexOf('olor') > -1) return true;
+
+  // some key names need to checked more thoroughly: "borderColorLeft", "boxShadow", etc
+  if (contains.some(function (searchFor) {
+    return key.indexOf(searchFor) !== -1;
+  })) return true;
 
   // a few custom attributes that don't have "color" in their names
   //
@@ -642,24 +648,26 @@ function isKeyColorRelated(key) {
 //
 function colorValueMapper(theme, key, value) {
   var colorMap = theme.meta.colors;
-  if (!colorMap) return;
+  if (!colorMap || !value) return;
 
   // if the value is a simple match for an existing color, use it
   var outputColor = colorMap[value];
   if (outputColor) return outputColor;
 
-  // for shorthand properties ("background"), we have to do a full text search & replace
-  if (fullTextSearch.indexOf(key) > -1) {
+  // otherwise, we have to do a full text search & replace. before we
+  // do the expensive searches, make sure that the value has multiple words!
+  //
+  if (value.indexOf(' ') !== -1) {
     var anyChanges = false;
     outputColor = value;
 
-    Object.keys(theme.meta.colors).forEach(function (oneColor) {
+    Object.keys(colorMap).forEach(function (oneColor) {
 
       var re = new RegExp('\\b' + oneColor + '\\b');
 
       outputColor = outputColor.replace(re, function () {
         anyChanges = true;
-        return theme.meta.colors[oneColor];
+        return colorMap[oneColor];
       });
     });
     if (anyChanges) return outputColor;
