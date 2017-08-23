@@ -15,22 +15,26 @@ const theme = {
 tape('color mapper maps keys correctly', t => {
 
   const inputStyles = {
-          color:           'prawn',
-          backgroundColor: 'noop',
-          borderColor:     'tofu transparent transparent',
-          background:      '30 basil things',
-          outline:         '3px dotted papaya',
-          stroke:          'papaya',
-          fontColor:       'tofu'
+          color:            'prawn',
+          backgroundColor:  'noop',
+          borderColor:      'tofu transparent transparent',
+          background:       '30 basil things',
+          outline:          '3px dotted papaya',
+          stroke:           'papaya',
+          fontColor:        'tofu',
+          borderColorRight: 'basil',
+          boxShadow:        '1px 1px 4px papaya'
         },
         expectedStyles = {
-          color:           '111',
-          backgroundColor: 'noop',
-          borderColor:     '333 transparent transparent',
-          background:      '30 222 things',
-          outline:         '3px dotted 444',
-          stroke:          '444',
-          fontColor:       '333'
+          color:            '111',
+          backgroundColor:  'noop',
+          borderColor:      '333 transparent transparent',
+          background:       '30 222 things',
+          outline:          '3px dotted 444',
+          stroke:           '444',
+          fontColor:        '333',
+          borderColorRight: '222',
+          boxShadow:        '1px 1px 4px 444'
         },
         actualStyles = mapColorKeys(theme, inputStyles);
 
