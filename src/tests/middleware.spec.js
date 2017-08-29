@@ -112,3 +112,27 @@ tape('color mapper is pure: if any changes in nested objects, we get a different
   t.plan(1);
   t.notEqual(actualStyles, inputStyles, 'the input object should be copied when colors are mapped in nested objects');
 });
+
+tape('color mapper ignores values inside meta', t => {
+
+  const inputStyles = {
+          color: 'prawn',
+          meta: {
+            color: -1,
+            backgroundColor: null,
+            stroke: 'prawn'
+          }
+        },
+        expectedStyles = {
+          color: '111',
+          meta: {
+            color: -1,
+            backgroundColor: null,
+            stroke: 'prawn'
+          }
+        },
+        actualStyles = mapColorKeys(theme, inputStyles);
+
+  t.plan(1);
+  t.equal(JSON.stringify(actualStyles), JSON.stringify(expectedStyles), 'meta should not be processed');
+});

@@ -31,7 +31,7 @@ function isKeyColorRelated(key) {
 //
 function colorValueMapper(theme, key, value) {
   const colorMap = theme.meta.colors;
-  if (!colorMap || !value)
+  if (!colorMap || !value || typeof value !== 'string')
     return;
 
   // if the value is a simple match for an existing color, use it
@@ -74,6 +74,9 @@ function styleDive(theme, styles, keyTester, valueMapper) {
       };
 
   Object.keys(styles).forEach(key => {
+
+    if (key === 'meta')
+      return;
 
     if (isObject(styles[key])) {
       let {cloned: clonedChild, styles: childStyles} = styleDive(theme, styles[key], keyTester, valueMapper);

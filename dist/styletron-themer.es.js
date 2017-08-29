@@ -641,7 +641,7 @@ function isKeyColorRelated(key) {
 //
 function colorValueMapper(theme, key, value) {
   var colorMap = theme.meta.colors;
-  if (!colorMap || !value) return;
+  if (!colorMap || !value || typeof value !== 'string') return;
 
   // if the value is a simple match for an existing color, use it
   var outputColor = colorMap[value];
@@ -680,6 +680,8 @@ function styleDive(theme, styles, keyTester, valueMapper) {
   };
 
   Object.keys(styles).forEach(function (key) {
+
+    if (key === 'meta') return;
 
     if (isObject$1(styles[key])) {
       var _styleDive = styleDive(theme, styles[key], keyTester, valueMapper),
