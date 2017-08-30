@@ -4,6 +4,8 @@ import assignDeep from 'assign-deep';
 import {injectStylePrefixed} from 'styletron-utils';
 import {getDisplayName} from './utils';
 
+// TODO: this is probably no longer needed, now that we offer "classify" on the render callback
+
 /**
  * the classify decorator is used by APPLICATION authors more than component authors.
  * it provides a "classify" function as a prop. this can be used to put styles

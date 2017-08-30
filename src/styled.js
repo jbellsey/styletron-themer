@@ -75,8 +75,7 @@ export default class Styled extends Component {
   //
   getStyle() {
     let
-      // the theme is stored on context
-      masterTheme = this.context.themeProvider.theme,
+      {themeProvider} = this.context,
 
       componentTheme = this.getComponentTheme(),
 
@@ -92,7 +91,7 @@ export default class Styled extends Component {
         componentTheme,
 
         // the global meta (for colors and other global attributes)
-        globalMeta: masterTheme.meta,
+        globalMeta: themeProvider.theme.meta,
 
         // last, but not least, the props
         props: this.props
@@ -108,9 +107,19 @@ export default class Styled extends Component {
       styleObj = assignDeep({}, styleObj, this.props.style);
 
     // middleware
-    styleObj = this.context.themeProvider.applyMiddleware(styleObj);
+    styleObj = themeProvider.applyMiddleware(styleObj);
 
     return styleObj;
+  }
+
+  // passed to the user to render sub-components. pass in any styletron object, and
+  // we'll convert it to classes for you
+  //
+  classify = styletronObject => {
+    return injectStylePrefixed(
+      this.context.styletron,
+      this.context.themeProvider.applyMiddleware(styletronObject)
+    );
   }
 
   render() {
@@ -127,7 +136,10 @@ export default class Styled extends Component {
             componentTheme: this.getComponentTheme(),
 
             // the global meta (for colors, etc)
-            globalMeta: theme.meta
+            globalMeta: theme.meta,
+
+            // easy access to "classify", for building classes for sub-components
+            classify: this.classify
           };
 
     // invoke the render callback with three params

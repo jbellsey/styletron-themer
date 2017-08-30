@@ -1,6 +1,6 @@
 import tape from 'blue-tape';
 import assignDeep from 'assign-deep';
-import React from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Styletron from 'styletron-server';   // we use the server package here
 import {mount} from './spec-helpers/helpers';
@@ -76,7 +76,7 @@ function dynamicStyleWithNoStatic({props}) {
   return allStyles;
 }
 
-class TestFunctionComponent extends React.Component {
+class TestFunctionComponent extends Component {
   static propTypes = ourPropTypes;
   render() {
     return (
@@ -95,7 +95,7 @@ class TestFunctionComponent extends React.Component {
 // this component uses the render function, but does not tell us its name.
 // that's fine, but it prevents the component from being registered for theming
 //
-class TestUnnamedFunctionComponent extends React.Component {
+class TestUnnamedFunctionComponent extends Component {
   static propTypes = ourPropTypes;
   render() {
     return (
@@ -113,7 +113,7 @@ class TestUnnamedFunctionComponent extends React.Component {
 // what happens if the user doesn't provide a static style object? the component is
 // not themable, but it should work properly
 //
-class TestDynamicStylesOnly extends React.Component {
+class TestDynamicStylesOnly extends Component {
   static propTypes = ourPropTypes;
   render() {
     return (
@@ -127,7 +127,7 @@ class TestDynamicStylesOnly extends React.Component {
   }
 }
 
-class TestStaticStylesOnly extends React.Component {
+class TestStaticStylesOnly extends Component {
   static propTypes = ourPropTypes;
   render() {
     return (
@@ -336,7 +336,7 @@ Object.keys(testSuites).forEach(key => runTestSuite(key));
 
 //--- other tests
 
-class TestRenderCallbackProps extends React.Component {
+class TestRenderCallbackProps extends Component {
   static propTypes = ourPropTypes;
   render() {
     return (
@@ -424,5 +424,50 @@ tape.test('styled component passes global meta to render callback', t => {
 
   t.equal(receivedMeta.ocean, '11', 'render callback should receive global meta');
   t.equal(receivedMeta.colors.bluish, '#204899', 'render callback should receive global meta');
+  t.end();
+});
+
+
+class TestClassify extends Component {
+  render() {
+    return (
+      <Styled>
+        {(_className, _props, {classify}) => {
+          const subcomponentClasses = classify({
+            fontSize: '71px',
+            zIndex:   48,
+            color:    'guldan'   // gets middlewared below
+          });
+          anythingWatcher.invoke(subcomponentClasses);
+          return null;
+        }}
+      </Styled>
+    );
+  }
+}
+
+tape.test('styled component offers "classify" method to assist with subcomponents', t => {
+
+  let classes = null;
+
+  anythingWatcher.start(subcomponentClasses => classes = subcomponentClasses);
+  mount(<TestClassify />);
+  anythingWatcher.end();
+
+  t.equal(typeof classes, 'string', 'classify should return a string');
+  t.equal(classes.length, 5, 'classify string should be exactly 5 characters long')
+  t.equal(classes.split(' ').length, 3, 'classify should return three classes, from three style attributes')
+  t.end();
+});
+
+tape.test('classify applies middleware correctly', t => {
+  let localStyletron = new Styletron(),
+      theme = { meta: { colors: { 'guldan': '#590499' } } };    // no actual components; just a meta is needed here
+
+  mount(<TestClassify />, theme, {styletron: localStyletron});
+
+  const styles = localStyletron.getCss();
+
+  t.equal(styles.indexOf('color:#590499') >= 0, true, 'middleware should be applied');
   t.end();
 });

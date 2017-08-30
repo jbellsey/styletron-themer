@@ -382,6 +382,10 @@ var Styled = (_temp = _class = function (_Component) {
 
     var _this = possibleConstructorReturn(this, (Styled.__proto__ || Object.getPrototypeOf(Styled)).call(this, props, context));
 
+    _this.classify = function (styletronObject) {
+      return styletronUtils.injectStylePrefixed(_this.context.styletron, _this.context.themeProvider.applyMiddleware(styletronObject));
+    };
+
     if (!context.themeProvider) {
       console.error('Styled components must be rendered inside a ThemeProvider.'); // eslint-disable-line
     }
@@ -421,9 +425,7 @@ var Styled = (_temp = _class = function (_Component) {
   }, {
     key: 'getStyle',
     value: function getStyle() {
-      var
-      // the theme is stored on context
-      masterTheme = this.context.themeProvider.theme,
+      var themeProvider = this.context.themeProvider,
           componentTheme = this.getComponentTheme(),
           styleObj = void 0;
 
@@ -437,7 +439,7 @@ var Styled = (_temp = _class = function (_Component) {
           componentTheme: componentTheme,
 
           // the global meta (for colors and other global attributes)
-          globalMeta: masterTheme.meta,
+          globalMeta: themeProvider.theme.meta,
 
           // last, but not least, the props
           props: this.props
@@ -450,10 +452,15 @@ var Styled = (_temp = _class = function (_Component) {
       if (this.props.style) styleObj = index({}, styleObj, this.props.style);
 
       // middleware
-      styleObj = this.context.themeProvider.applyMiddleware(styleObj);
+      styleObj = themeProvider.applyMiddleware(styleObj);
 
       return styleObj;
     }
+
+    // passed to the user to render sub-components. pass in any styletron object, and
+    // we'll convert it to classes for you
+    //
+
   }, {
     key: 'render',
     value: function render() {
@@ -475,7 +482,10 @@ var Styled = (_temp = _class = function (_Component) {
         componentTheme: this.getComponentTheme(),
 
         // the global meta (for colors, etc)
-        globalMeta: theme.meta
+        globalMeta: theme.meta,
+
+        // easy access to "classify", for building classes for sub-components
+        classify: this.classify
       };
 
       // invoke the render callback with three params
@@ -534,6 +544,8 @@ function getDisplayName(Component$$1) {
 function isObject$1(item) {
   return (typeof item === 'undefined' ? 'undefined' : _typeof(item)) === "object" && !Array.isArray(item) && item !== null;
 }
+
+// TODO: this is probably no longer needed, now that we offer "classify" on the render callback
 
 /**
  * the classify decorator is used by APPLICATION authors more than component authors.
