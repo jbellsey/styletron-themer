@@ -408,6 +408,7 @@ var Styled = (_temp = _class = function (_Component) {
     key: 'getComponentTheme',
     value: function getComponentTheme() {
       var theme = this.componentName ? this.context.themeProvider.theme[this.componentName] : this.props.staticStyle; // for unthemed (unnamed) components
+      if (this.props.localTheme) theme = index({}, theme, this.props.localTheme);
       return theme || {};
     }
 
@@ -464,8 +465,9 @@ var Styled = (_temp = _class = function (_Component) {
           themeName = _props.themeName,
           staticStyle = _props.staticStyle,
           dynamicStyle = _props.dynamicStyle,
+          localTheme = _props.localTheme,
           style = _props.style,
-          passThroughProps = objectWithoutProperties(_props, ['className', 'children', 'themeName', 'staticStyle', 'dynamicStyle', 'style']),
+          passThroughProps = objectWithoutProperties(_props, ['className', 'children', 'themeName', 'staticStyle', 'dynamicStyle', 'localTheme', 'style']),
           _context = this.context,
           styletron = _context.styletron,
           theme = _context.themeProvider.theme,
@@ -516,6 +518,7 @@ var Styled = (_temp = _class = function (_Component) {
   // for per-instance styling
   className: PropTypes.string,
   style: PropTypes.object,
+  localTheme: PropTypes.object,
 
   // we only accept a render callback function for children
   children: PropTypes.func.isRequired

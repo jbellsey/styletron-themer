@@ -154,7 +154,8 @@ const testSuites = {
     Component: TestUnnamedFunctionComponent
   },
   dynamicOnly: {
-    Component: TestDynamicStylesOnly
+    Component: TestDynamicStylesOnly,
+    dynamicOnly: true
   },
   staticOnly: {
     Component: TestStaticStylesOnly,
@@ -171,7 +172,8 @@ function runTestSuite(componentType) {
     const {
             Component: ComponentUnderTest,
             name:      componentName,
-            staticOnly = true
+            staticOnly = true,
+            dyamicOnly = true
           } = testSuites[componentType];
 
     const maybeTest = (condition, ...testArgs) => condition && t.test(...testArgs);
@@ -238,6 +240,27 @@ function runTestSuite(componentType) {
       t.equal(fontSize, '99px', 'Styled component should use style values from the theme when applicable');
       t.equal(zIndex,   '999',  'Styled component should use style values from the theme when applicable');
       t.equal(color,    'red',  'Styled component should use style values from the theme when applicable');
+    });
+
+    maybeTest(!dyamicOnly, `Styled component lets the user override default styles in a LOCAL theme (type: ${componentType})`, t => {
+      let localStyletron = new Styletron(),
+          theme = {
+            fontSize: '811px',
+            zIndex:   '118',
+            color:    'lime'     // a new property, not in the component
+          };
+
+      mount(<ComponentUnderTest localTheme={theme} />, null, {styletron: localStyletron});
+
+      const styles     = localStyletron.getCss(),
+            shouldFind = ['font-size:811px', 'z-index:118', 'color:lime'];
+
+      t.plan(shouldFind.length);
+      shouldFind.forEach(oneNeedle => {
+        if (styles.indexOf(oneNeedle) === -1)
+          console.log('NOT found:', oneNeedle, JSON.stringify(styles, null, 2))
+        t.equal(styles.indexOf(oneNeedle) >= 0, true, 'Styled component should use style values from the local theme when applicable');
+      });
     });
 
     maybeTest(componentName, `Styled component applies middleware correctly (type: ${componentType})`, t => {

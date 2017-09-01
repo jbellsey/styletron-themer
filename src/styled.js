@@ -42,6 +42,7 @@ export default class Styled extends Component {
     // for per-instance styling
     className:    PropTypes.string,
     style:        PropTypes.object,
+    localTheme:   PropTypes.object,
 
     // we only accept a render callback function for children
     children:     PropTypes.func.isRequired
@@ -67,6 +68,8 @@ export default class Styled extends Component {
     let theme = this.componentName
       ? this.context.themeProvider.theme[this.componentName]
       : this.props.staticStyle;   // for unthemed (unnamed) components
+    if (this.props.localTheme)
+      theme = assignDeep({}, theme, this.props.localTheme);
     return theme || {};
   }
 
@@ -124,7 +127,7 @@ export default class Styled extends Component {
 
   render() {
     const styleProperties = this.getStyle(),
-          {className, children, themeName, staticStyle, dynamicStyle, style, ...passThroughProps} = this.props,    // eslint-disable-line
+          {className, children, themeName, staticStyle, dynamicStyle, localTheme, style, ...passThroughProps} = this.props,    // eslint-disable-line
           {styletron, themeProvider: {theme}} = this.context,
 
           // convert the style properties into a set of classes. this is where
