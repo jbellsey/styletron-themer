@@ -83,7 +83,8 @@ export default class ThemeProvider extends Component {
  */
 ThemeProvider.propTypes = {
   theme:       PropTypes.object,
-  middlewares: PropTypes.arrayOf(PropTypes.func)
+  middlewares: PropTypes.arrayOf(PropTypes.func),
+  children:    PropTypes.node
 };
 
 // provided as a convenient export for consumers. it is not

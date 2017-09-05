@@ -172,8 +172,8 @@ function runTestSuite(componentType) {
     const {
             Component: ComponentUnderTest,
             name:      componentName,
-            staticOnly = true,
-            dyamicOnly = true
+            staticOnly  = true,
+            dynamicOnly = true
           } = testSuites[componentType];
 
     const maybeTest = (condition, ...testArgs) => condition && t.test(...testArgs);
@@ -242,7 +242,7 @@ function runTestSuite(componentType) {
       t.equal(color,    'red',  'Styled component should use style values from the theme when applicable');
     });
 
-    maybeTest(!dyamicOnly, `Styled component lets the user override default styles in a LOCAL theme (type: ${componentType})`, t => {
+    maybeTest(!dynamicOnly, `Styled component lets the user override default styles in a LOCAL theme (type: ${componentType})`, t => {
       let localStyletron = new Styletron(),
           theme = {
             fontSize: '811px',

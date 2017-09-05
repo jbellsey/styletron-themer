@@ -31,11 +31,6 @@
 
   "rules": {
     "semi":    [2, "always"],
-    "max-len": [2, 140, 2],
-    "react/prop-types": [2, {
-      // suppress warnings for some missing propTypes. these props are available on
-      // every component in this repo, making these particular warnings pure noise.
-      "ignore": ["children", "className", "inlineStyles", "stripProps"]
-    }]
+    "max-len": [2, 140, 2]
   }
 }

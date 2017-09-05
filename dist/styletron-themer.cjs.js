@@ -16,8 +16,10 @@ var styletronUtils = require('styletron-utils');
  * Licensed under the MIT License.
  */
 
+'use strict';
+
 // see http://jsperf.com/testing-value-is-primitive/7
-var index$1 = function isPrimitive(value) {
+var isPrimitive = function isPrimitive(value) {
   return value == null || (typeof value !== 'function' && typeof value !== 'object');
 };
 
@@ -28,7 +30,9 @@ var index$1 = function isPrimitive(value) {
  * Licensed under the MIT License.
  */
 
-var index$3 = function(receiver, objects) {
+'use strict';
+
+var assignSymbols = function(receiver, objects) {
   if (receiver === null || typeof receiver === 'undefined') {
     throw new TypeError('expected first argument to be an object.');
   }
@@ -69,7 +73,7 @@ var toString = Object.prototype.toString;
  * @return {*} Native javascript type
  */
 
-var index$5 = function kindOf(val) {
+var kindOf = function kindOf(val) {
   var type = typeof val;
 
   // primitivies
@@ -201,7 +205,20 @@ function isBuffer(val) {
     && val.constructor.isBuffer(val);
 }
 
-function assign(target/*, objects*/) {
+/*!
+ * assign-deep <https://github.com/jonschlinkert/assign-deep>
+ *
+ * Copyright (c) 2017, Jon Schlinkert.
+ * Released under the MIT License.
+ */
+
+'use strict';
+
+
+
+
+
+function assign$1(target/*, objects*/) {
   target = target || {};
   var len = arguments.length, i = 0;
   if (len === 1) {
@@ -209,7 +226,7 @@ function assign(target/*, objects*/) {
   }
   while (++i < len) {
     var val = arguments[i];
-    if (index$1(target)) {
+    if (isPrimitive(target)) {
       target = val;
     }
     if (isObject(val)) {
@@ -224,16 +241,16 @@ function assign(target/*, objects*/) {
  */
 
 function extend(target, obj) {
-  index$3(target, obj);
+  assignSymbols(target, obj);
 
   for (var key in obj) {
     if (hasOwn(obj, key)) {
       var val = obj[key];
       if (isObject(val)) {
-        if (index$5(target[key]) === 'undefined' && index$5(val) === 'function') {
+        if (kindOf(target[key]) === 'undefined' && kindOf(val) === 'function') {
           target[key] = val;
         }
-        target[key] = assign(target[key] || {}, val);
+        target[key] = assign$1(target[key] || {}, val);
       } else {
         target[key] = val;
       }
@@ -247,7 +264,7 @@ function extend(target, obj) {
  */
 
 function isObject(obj) {
-  return index$5(obj) === 'object' || index$5(obj) === 'function';
+  return kindOf(obj) === 'object' || kindOf(obj) === 'function';
 }
 
 /**
@@ -262,8 +279,9 @@ function hasOwn(obj, key) {
  * Expose `assign`
  */
 
-var index = assign;
+var assignDeep = assign$1;
 
+var babelHelpers = {};
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
 } : function (obj) {
@@ -274,7 +292,118 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 
 
+var asyncGenerator = function () {
+  function AwaitValue(value) {
+    this.value = value;
+  }
 
+  function AsyncGenerator(gen) {
+    var front, back;
+
+    function send(key, arg) {
+      return new Promise(function (resolve, reject) {
+        var request = {
+          key: key,
+          arg: arg,
+          resolve: resolve,
+          reject: reject,
+          next: null
+        };
+
+        if (back) {
+          back = back.next = request;
+        } else {
+          front = back = request;
+          resume(key, arg);
+        }
+      });
+    }
+
+    function resume(key, arg) {
+      try {
+        var result = gen[key](arg);
+        var value = result.value;
+
+        if (value instanceof AwaitValue) {
+          Promise.resolve(value.value).then(function (arg) {
+            resume("next", arg);
+          }, function (arg) {
+            resume("throw", arg);
+          });
+        } else {
+          settle(result.done ? "return" : "normal", result.value);
+        }
+      } catch (err) {
+        settle("throw", err);
+      }
+    }
+
+    function settle(type, value) {
+      switch (type) {
+        case "return":
+          front.resolve({
+            value: value,
+            done: true
+          });
+          break;
+
+        case "throw":
+          front.reject(value);
+          break;
+
+        default:
+          front.resolve({
+            value: value,
+            done: false
+          });
+          break;
+      }
+
+      front = front.next;
+
+      if (front) {
+        resume(front.key, front.arg);
+      } else {
+        back = null;
+      }
+    }
+
+    this._invoke = send;
+
+    if (typeof gen.return !== "function") {
+      this.return = undefined;
+    }
+  }
+
+  if (typeof Symbol === "function" && Symbol.asyncIterator) {
+    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
+      return this;
+    };
+  }
+
+  AsyncGenerator.prototype.next = function (arg) {
+    return this._invoke("next", arg);
+  };
+
+  AsyncGenerator.prototype.throw = function (arg) {
+    return this._invoke("throw", arg);
+  };
+
+  AsyncGenerator.prototype.return = function (arg) {
+    return this._invoke("return", arg);
+  };
+
+  return {
+    wrap: function (fn) {
+      return function () {
+        return new AsyncGenerator(fn.apply(this, arguments));
+      };
+    },
+    await: function (value) {
+      return new AwaitValue(value);
+    }
+  };
+}();
 
 
 
@@ -309,20 +438,6 @@ var createClass = function () {
 
 
 
-
-var _extends = Object.assign || function (target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i];
-
-    for (var key in source) {
-      if (Object.prototype.hasOwnProperty.call(source, key)) {
-        target[key] = source[key];
-      }
-    }
-  }
-
-  return target;
-};
 
 
 
@@ -370,6 +485,28 @@ var possibleConstructorReturn = function (self, call) {
   return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+babelHelpers;
+
 var _class;
 var _temp;
 
@@ -415,7 +552,7 @@ var Styled = (_temp = _class = function (_Component) {
     key: 'getComponentTheme',
     value: function getComponentTheme() {
       var theme = this.componentName ? this.context.themeProvider.theme[this.componentName] : this.props.staticStyle; // for unthemed (unnamed) components
-      if (this.props.localTheme) theme = index({}, theme, this.props.localTheme);
+      if (this.props.localTheme) theme = assignDeep({}, theme, this.props.localTheme);
       return theme || {};
     }
 
@@ -450,7 +587,7 @@ var Styled = (_temp = _class = function (_Component) {
       // all components accept a "style" prop for custom styletron attributes.
       // this overrides React's use of "style", as described above.
       //
-      if (this.props.style) styleObj = index({}, styleObj, this.props.style);
+      if (this.props.style) styleObj = assignDeep({}, styleObj, this.props.style);
 
       // middleware
       styleObj = themeProvider.applyMiddleware(styleObj);
@@ -531,98 +668,6 @@ var Styled = (_temp = _class = function (_Component) {
   children: PropTypes.func.isRequired
 }, _temp);
 
-function getDisplayName(Component$$1) {
-  var name = Component$$1.displayName || Component$$1.name;
-  if (name) return name;
-
-  if (typeof Component$$1 === 'string') return Component$$1;
-
-  if (typeof Component$$1.type === 'string') return Component$$1.type;
-
-  if (typeof Component$$1.type === 'function') return getDisplayName(Component$$1.type);
-
-  return 'Unknown';
-}
-
-function isObject$1(item) {
-  return (typeof item === 'undefined' ? 'undefined' : _typeof(item)) === "object" && !Array.isArray(item) && item !== null;
-}
-
-// TODO: this is probably no longer needed, now that we offer "classify" on the render callback
-
-/**
- * the classify decorator is used by APPLICATION authors more than component authors.
- * it provides a "classify" function as a prop. this can be used to put styles
- * directly into HTML elements or other components that were not created with <Styled>.
- * this is an escape hatch that library authors should do their best to make unnecessary.
- *
- * @example
- *| @classify
- *| class MyComponent extends Component {
- *|    render() {
- *|      return <h2 className={this.props.classify({color: 'red'})}>Red title</h2>
- *|    }
- *| }
- */
-
-// can be used as a decorator or HoC
-//
-function classify(CustomComponent) {
-  var _class, _temp2;
-
-  var ClassifiedComponent = (_temp2 = _class = function (_Component) {
-    inherits(ClassifiedComponent, _Component);
-
-    function ClassifiedComponent() {
-      var _ref;
-
-      var _temp, _this, _ret;
-
-      classCallCheck(this, ClassifiedComponent);
-
-      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = ClassifiedComponent.__proto__ || Object.getPrototypeOf(ClassifiedComponent)).call.apply(_ref, [this].concat(args))), _this), _this.classifyStyles = function () {
-        for (var _len2 = arguments.length, styletronObjects = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-          styletronObjects[_key2] = arguments[_key2];
-        }
-
-        var allStyles = index.apply(undefined, [{}].concat(styletronObjects)),
-            themeProvider = _this.context.themeProvider;
-
-        if (themeProvider) allStyles = themeProvider.applyMiddleware(allStyles);
-        return styletronUtils.injectStylePrefixed(_this.context.styletron, allStyles);
-      }, _temp), possibleConstructorReturn(_this, _ret);
-    }
-
-    // we pull context from above
-
-
-    createClass(ClassifiedComponent, [{
-      key: 'render',
-      value: function render() {
-        return React__default.createElement(CustomComponent, _extends({}, this.props, {
-          classify: this.classifyStyles
-        }));
-      }
-    }]);
-    return ClassifiedComponent;
-  }(React.Component), _class.contextTypes = {
-
-    // from StyletronProvider (see styletron-react)
-    styletron: PropTypes.object.isRequired,
-
-    // from ThemeProvider
-    themeProvider: PropTypes.shape({
-      applyMiddleware: PropTypes.func.isRequired
-    })
-  }, _class.displayName = 'Classify_' + getDisplayName(CustomComponent), _temp2);
-
-  return ClassifiedComponent;
-}
-
 var libraryMeta = {};
 
 function installLibraryMeta(t) {
@@ -631,6 +676,10 @@ function installLibraryMeta(t) {
 
 function getDefaultTheme() {
   return { meta: libraryMeta };
+}
+
+function isObject$1(item) {
+  return (typeof item === 'undefined' ? 'undefined' : _typeof(item)) === "object" && !Array.isArray(item) && item !== null;
 }
 
 /*
@@ -697,7 +746,7 @@ function styleDive(theme, styles, keyTester, valueMapper) {
 
   var clonedRoot = false,
       cloneNow = function cloneNow() {
-    if (!clonedRoot) styles = index({}, styles);
+    if (!clonedRoot) styles = assignDeep({}, styles);
     clonedRoot = true;
   };
 
@@ -782,7 +831,7 @@ var ThemeProvider = (_temp$1 = _class$1 = function (_Component) {
 
     _this.installComponent = function (componentName, componentTheme) {
       if (_this.installedComponents.indexOf(componentName) === -1) {
-        _this.theme[componentName] = index({}, componentTheme, _this.theme[componentName]);
+        _this.theme[componentName] = assignDeep({}, componentTheme, _this.theme[componentName]);
         _this.installedComponents.push(componentName);
       }
     };
@@ -796,7 +845,7 @@ var ThemeProvider = (_temp$1 = _class$1 = function (_Component) {
     var _ref = (context || {}).themeProvider || {},
         parentTheme = _ref.theme;
 
-    _this.theme = index({}, getDefaultTheme(), parentTheme, props.theme);
+    _this.theme = assignDeep({}, getDefaultTheme(), parentTheme, props.theme);
     _this.middlewares = props.middlewares || [mapColorKeys];
     _this.installedComponents = [];
     return _this;
@@ -830,7 +879,8 @@ var ThemeProvider = (_temp$1 = _class$1 = function (_Component) {
 
 ThemeProvider.propTypes = {
   theme: PropTypes.object,
-  middlewares: PropTypes.arrayOf(PropTypes.func)
+  middlewares: PropTypes.arrayOf(PropTypes.func),
+  children: PropTypes.node
 };
 
 // provided as a convenient export for consumers. it is not
@@ -839,6 +889,5 @@ ThemeProvider.propTypes = {
 ThemeProvider.middlewares = availableMiddlewares;
 
 exports.Styled = Styled;
-exports.classify = classify;
 exports.ThemeProvider = ThemeProvider;
 exports.installLibraryMeta = installLibraryMeta;

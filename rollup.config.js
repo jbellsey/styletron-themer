@@ -3,7 +3,7 @@ import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 
 export default {
-  entry: 'src/index.js',
+  input: 'src/index.js',
   plugins: [
     babel({
       "babelrc": false,
@@ -25,11 +25,11 @@ export default {
   ],
   // peer deps should not be embedded
   external: id => id === 'prop-types' || /^react/.test(id) || /^styletron/.test(id),
-  targets: [{
+  output: [{
     format: 'cjs',
-    dest: 'dist/styletron-themer.cjs.js'
+    file:   'dist/styletron-themer.cjs.js'
   }, {
     format: 'es',
-    dest: 'dist/styletron-themer.es.js'
+    file:   'dist/styletron-themer.es.js'
   }]
 };
