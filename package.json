@@ -5,7 +5,10 @@
   "keywords": [
     "Styletron",
     "React",
-    "Components"
+    "Components",
+    "Library",
+    "CSS-in-JS",
+    "Styled"
   ],
   "main": "dist/styletron-themer.cjs.js",
   "module": "dist/styletron-themer.es.js",
@@ -15,7 +18,7 @@
     "test:ci": "TEST_ENV=ci karma start",
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix",
-    "prepublish": "npm run build"
+    "prepare": "npm run build"
   },
   "pre-commit": [
     "lint",
@@ -23,9 +26,9 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://source.corp.lookout.com/frontend/styletron-themer"
+    "url": "git+https://github.com/lookout/styletron-themer.git"
   },
-  "author": "Jeff Bellsey",
+  "author": "Jeff Bellsey <jeff.bellsey@lookout.com>",
   "license": "MIT",
   "devDependencies": {
     "babel-cli": "^6.26.0",
