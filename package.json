@@ -21,8 +21,7 @@
     "prepare": "npm run build"
   },
   "pre-commit": [
-    "lint",
-    "build"
+    "lint"
   ],
   "repository": {
     "type": "git",
