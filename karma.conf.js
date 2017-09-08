@@ -42,8 +42,7 @@ module.exports = function(config) {
         'react/lib/ReactContext':         true,
         'react/addons':                   true
       },
-      node: {fs: 'empty'},
-      watch: false // !isCI
+      node: {fs: 'empty'}
     },
     webpackServer: {
       noInfo: true

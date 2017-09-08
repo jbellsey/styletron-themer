@@ -13,6 +13,7 @@ you're probably using Styletron to manage CSS in JavaScript.
 ## Documentation
 
 [Full documentation can be found here](https://jbellsey.gitbooks.io/styletron-themer/).
+(Docs will be moving soon; bookmark this page, not that one.)
 
 ## Installation
 
