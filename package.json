@@ -1,6 +1,6 @@
 {
   "name": "styletron-themer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Themable component-building tool for Styletron & React",
   "keywords": [
     "Styletron",
@@ -70,7 +70,7 @@
   },
   "peerDependencies": {
     "prop-types": "^15.5",
-    "react": "^15",
+    "react": "^15 || ^16",
     "styletron-utils": "^2.5"
   },
   "dependencies": {
