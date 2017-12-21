@@ -510,6 +510,9 @@ babelHelpers;
 var _class;
 var _temp;
 
+var testMode = process.env.NODE_ENV === 'TEST';
+var emptyThemeProvider = { theme: { meta: { globalMeta: {} } } };
+
 var Styled = (_temp = _class = function (_Component) {
   inherits(Styled, _Component);
 
@@ -520,17 +523,23 @@ var Styled = (_temp = _class = function (_Component) {
     var _this = possibleConstructorReturn(this, (Styled.__proto__ || Object.getPrototypeOf(Styled)).call(this, props, context));
 
     _this.classify = function (styletronObject) {
-      return styletronUtils.injectStylePrefixed(_this.context.styletron, _this.context.themeProvider.applyMiddleware(styletronObject));
+      try {
+        return styletronUtils.injectStylePrefixed(_this.context.styletron, _this.context.themeProvider.applyMiddleware(styletronObject));
+      } catch (e) {
+        return '';
+      }
     };
 
-    if (!context.themeProvider) console.error('Styled components must be rendered inside a ThemeProvider.'); // eslint-disable-line
+    if (!context.themeProvider && !testMode) console.error('Styled components must be rendered inside a ThemeProvider.'); // eslint-disable-line
+
+    if (!context.styletron && !testMode) console.error('Styled components must be rendered inside a StyletronProvider.'); // eslint-disable-line
 
     _this.componentName = props.themeName;
 
     // ensure that the component's static style is inserted into the master theme.
     // unnamed components are not installed into the theme; see getComponentTheme() below
     //
-    if (_this.componentName) context.themeProvider.installComponent(_this.componentName, props.staticStyle || {});
+    if (_this.componentName && context.themeProvider) context.themeProvider.installComponent(_this.componentName, props.staticStyle || {});
     return _this;
   }
 
@@ -551,9 +560,15 @@ var Styled = (_temp = _class = function (_Component) {
   */
 
   createClass(Styled, [{
+    key: 'getRootTheme',
+    value: function getRootTheme() {
+      if (this.componentName && this.context.themeProvider) return this.context.themeProvider.theme[this.componentName];
+      return this.props.staticStyle; // for unthemed (unnamed) components
+    }
+  }, {
     key: 'getComponentTheme',
     value: function getComponentTheme() {
-      var theme = this.componentName ? this.context.themeProvider.theme[this.componentName] : this.props.staticStyle; // for unthemed (unnamed) components
+      var theme = this.getRootTheme();
       if (this.props.localTheme) theme = assignDeep({}, theme, this.props.localTheme);
       return theme || {};
     }
@@ -565,13 +580,15 @@ var Styled = (_temp = _class = function (_Component) {
   }, {
     key: 'getStyle',
     value: function getStyle() {
-      var themeProvider = this.context.themeProvider,
+      var _context$themeProvide = this.context.themeProvider,
+          themeProvider = _context$themeProvide === undefined ? emptyThemeProvider : _context$themeProvide,
           componentTheme = this.getComponentTheme(),
           styleObj = void 0;
 
       // use the component's dynamic styling function to adjust the styles for this instance
       // based on props
       //
+
       if (typeof this.props.dynamicStyle === 'function') {
         styleObj = this.props.dynamicStyle({
 
@@ -611,14 +628,15 @@ var Styled = (_temp = _class = function (_Component) {
           localTheme = _props.localTheme,
           style = _props.style,
           passThroughProps = objectWithoutProperties(_props, ['className', 'children', 'themeName', 'staticStyle', 'dynamicStyle', 'localTheme', 'style']),
-          theme = this.context.themeProvider.theme,
+          _context$themeProvide2 = this.context.themeProvider,
+          themeProvider = _context$themeProvide2 === undefined ? emptyThemeProvider : _context$themeProvide2,
           styletronClasses = this.classify(styleProperties),
           paramBlock = {
         // the base theme of your component
         componentTheme: this.getComponentTheme(),
 
         // the global meta (for colors, etc)
-        globalMeta: theme.meta,
+        globalMeta: themeProvider.theme.meta,
 
         // easy access to "classify", for building classes for sub-components
         classify: this.classify
@@ -642,14 +660,14 @@ var Styled = (_temp = _class = function (_Component) {
 }(React.Component), _class.contextTypes = {
 
   // from StyletronProvider (see styletron-react)
-  styletron: PropTypes.object.isRequired,
+  styletron: PropTypes.object,
 
   // from ThemeProvider
   themeProvider: PropTypes.shape({
     theme: PropTypes.object.isRequired,
     installComponent: PropTypes.func.isRequired,
     applyMiddleware: PropTypes.func.isRequired
-  }).isRequired
+  })
 }, _class.propTypes = {
   // basic props
   themeName: PropTypes.string, // unnamed components are not themeable; useful for one-offs

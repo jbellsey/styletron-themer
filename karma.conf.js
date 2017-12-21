@@ -1,5 +1,6 @@
 let path      = require('path'),
     testEnv   = process.env.TEST_ENV,
+    webpack   = require('webpack'),
     isCI      = (testEnv === 'ci'),
     testFiles = './test-files.js';
 
@@ -21,7 +22,13 @@ module.exports = function(config) {
     singleRun: isCI,
     webpack: {
       devtool:   'inline-source-map',
-      plugins:   [],
+      plugins:   [
+        new webpack.DefinePlugin({
+          'process.env': {
+            NODE_ENV: JSON.stringify('TEST')
+          }
+        })
+      ],
       resolve:   {
         extensions: ['.js']
       },

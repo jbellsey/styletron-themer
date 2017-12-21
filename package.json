@@ -1,6 +1,6 @@
 {
   "name": "styletron-themer",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Themable component-building tool for Styletron & React",
   "keywords": [
     "Styletron",
@@ -14,8 +14,8 @@
   "module": "dist/styletron-themer.es.js",
   "scripts": {
     "build": "rollup -c rollup.config.js",
-    "test": "karma start",
-    "test:ci": "TEST_ENV=ci karma start",
+    "test": "NODE_ENV=TEST karma start",
+    "test:ci": "NODE_ENV=TEST TEST_ENV=ci karma start",
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix",
     "prepare": "npm run build"
