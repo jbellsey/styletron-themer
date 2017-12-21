@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import assignDeep from 'assign-deep';
 import {injectStylePrefixed} from 'styletron-utils';
 
-const testMode = (process.env.NODE_ENV === 'TEST'),
+const testMode = (process.env.NODE_ENV === 'TEST' || process.env.NODE_ENV === 'test'),
       emptyThemeProvider = {theme: {meta: {globalMeta: {}}}};
 
 export default class Styled extends Component {
@@ -59,11 +59,13 @@ export default class Styled extends Component {
   constructor(props, context) {
     super(props, context);
 
-    if (!context.themeProvider && !testMode)
-      console.error('Styled components must be rendered inside a ThemeProvider.');  // eslint-disable-line
+    if (!testMode) {
+      if (!context.themeProvider)
+        console.error('Styled components must be rendered inside a ThemeProvider.');  // eslint-disable-line
 
-    if (!context.styletron && !testMode)
-      console.error('Styled components must be rendered inside a StyletronProvider.');  // eslint-disable-line
+      if (!context.styletron)
+        console.error('Styled components must be rendered inside a StyletronProvider.');  // eslint-disable-line
+    }
 
     this.componentName = props.themeName;
 
