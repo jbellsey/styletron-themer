@@ -2,7 +2,7 @@ import tape from 'blue-tape';
 import assignDeep from 'assign-deep';
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import Styletron from 'styletron-server';   // we use the server package here
+import {Server as StyletronServer} from 'styletron-engine-atomic';
 import {mount} from './spec-helpers/helpers';
 import Styled from '../styled';
 import {installLibraryMeta} from '../default-theme';
@@ -39,7 +39,12 @@ const staticStyle = {
   fontSize:   '33px',
   zIndex:     '333',
   fontWeight: '700',
-  color:      null    // see below
+  color:      null,    // see below
+  meta: {
+    extras: {
+      paddingTop: '99px'
+    }
+  }
 };
 
 function dynamicStyle({componentTheme, props}) {
@@ -54,7 +59,7 @@ function dynamicStyle({componentTheme, props}) {
   if (layer !== undefined)
     instanceStyles.zIndex = layer;
 
-  const allStyles = assignDeep({}, componentTheme, instanceStyles);
+  const allStyles = assignDeep({}, componentTheme, componentTheme.meta.extras, instanceStyles);
   anythingWatcher.invoke(allStyles, componentTheme);
   return allStyles;
 }
@@ -181,39 +186,42 @@ function runTestSuite(componentType) {
     //--------------
 
     t.test(`Styled component passes through custom attributes (type: ${componentType})`, t => {
-      let c = mount(<ComponentUnderTest id="test-id" data-peanut-butter="crunchy" />).getDOMNode();
-      t.plan(2);
-      t.equal(c.getAttribute('id'), 'test-id', 'Styled component should pass through id attribute');
-      t.equal(c.getAttribute('data-peanut-butter'), 'crunchy', 'Styled component should pass through data attributes');
+      return mount(<ComponentUnderTest id="test-id" data-peanut-butter="crunchy" />)
+        .then(comp => {
+          let c = comp.getDOMNode();
+          t.equal(c.getAttribute('id'), 'test-id', 'Styled component should pass through id attribute');
+          t.equal(c.getAttribute('data-peanut-butter'), 'crunchy', 'Styled component should pass through data attributes');
+        });
     });
 
     t.test(`Styled component processes default styles without a theme (type: ${componentType})`, t => {
-      let localStyletron = new Styletron();
+      let localStyletron = new StyletronServer();
 
-      mount(<ComponentUnderTest />, null, {styletron: localStyletron});
+      return mount(<ComponentUnderTest />, null, {styletron: localStyletron})
+        .then(() => {
+          const styles     = localStyletron.getCss(),
+                shouldFind = ['font-size:33px'];
 
-      const styles     = localStyletron.getCss(),
-            shouldFind = ['font-size:33px'];
-
-      shouldFind.forEach(oneNeedle => {
-        t.equal(styles.indexOf(oneNeedle) >= 0, true, 'default component styles should be applied');
-      });
-      t.end();
+          shouldFind.forEach(oneNeedle => {
+            t.equal(styles.indexOf(oneNeedle) >= 0, true, 'default component styles should be applied');
+          });
+        });
     });
 
     maybeTest(!staticOnly, `Styled component adapts to props correctly (type: ${componentType})`, t => {
       let fontSize = null;
 
-      t.plan(2);
       anythingWatcher.start(allStyles => {fontSize = allStyles.fontSize;});
 
-      mount(<ComponentUnderTest size='small' />);
-      t.equal(fontSize, '11px', 'makeStyles function should adapt styles to props');
-
-      mount(<ComponentUnderTest size='large' />);
-      t.equal(fontSize, '55px', 'makeStyles function should adapt styles to props');
-
-      anythingWatcher.end();
+      return mount(<ComponentUnderTest size='small' />)
+        .then(() => {
+          t.equal(fontSize, '11px', 'makeStyles function should adapt styles to props');
+          return mount(<ComponentUnderTest size='large' />);
+        })
+        .then(() => {
+          t.equal(fontSize, '55px', 'makeStyles function should adapt styles to props');
+          anythingWatcher.end();
+        });
     });
 
     maybeTest(componentName, `Styled component lets the user override default styles in the theme (type: ${componentType})`, t => {
@@ -233,38 +241,39 @@ function runTestSuite(componentType) {
         zIndex   = allStyles.zIndex;
         color    = allStyles.color;
       });
-      mount(<ComponentUnderTest />, theme);
-      anythingWatcher.end();
+      return mount(<ComponentUnderTest />, theme)
+        .then(() => {
+          anythingWatcher.end();
 
-      t.plan(3);
-      t.equal(fontSize, '99px', 'Styled component should use style values from the theme when applicable');
-      t.equal(zIndex,   '999',  'Styled component should use style values from the theme when applicable');
-      t.equal(color,    'red',  'Styled component should use style values from the theme when applicable');
+          t.equal(fontSize, '99px', 'Styled component should use style values from the theme when applicable');
+          t.equal(zIndex,   '999',  'Styled component should use style values from the theme when applicable');
+          t.equal(color,    'red',  'Styled component should use style values from the theme when applicable');
+        });
     });
 
     maybeTest(!dynamicOnly, `Styled component lets the user override default styles in a LOCAL theme (type: ${componentType})`, t => {
-      let localStyletron = new Styletron(),
+      let localStyletron = new StyletronServer(),
           theme = {
             fontSize: '811px',
             zIndex:   '118',
             color:    'lime'     // a new property, not in the component
           };
 
-      mount(<ComponentUnderTest localTheme={theme} />, null, {styletron: localStyletron});
+      return mount(<ComponentUnderTest localTheme={theme} />, null, {styletron: localStyletron})
+        .then(() => {
+          const styles     = localStyletron.getCss(),
+                shouldFind = ['font-size:811px', 'z-index:118', 'color:lime'];
 
-      const styles     = localStyletron.getCss(),
-            shouldFind = ['font-size:811px', 'z-index:118', 'color:lime'];
-
-      t.plan(shouldFind.length);
-      shouldFind.forEach(oneNeedle => {
-        if (styles.indexOf(oneNeedle) === -1)
-          console.log('NOT found:', oneNeedle, JSON.stringify(styles, null, 2))
-        t.equal(styles.indexOf(oneNeedle) >= 0, true, 'Styled component should use style values from the local theme when applicable');
-      });
+          shouldFind.forEach(oneNeedle => {
+            if (styles.indexOf(oneNeedle) === -1)
+              console.log('NOT found:', oneNeedle, JSON.stringify(styles, null, 2))
+            t.equal(styles.indexOf(oneNeedle) >= 0, true, 'Styled component should use style values from the local theme when applicable');
+          });
+        });
     });
 
     maybeTest(componentName, `Styled component applies middleware correctly (type: ${componentType})`, t => {
-      let localStyletron = new Styletron(),
+      let localStyletron = new StyletronServer(),
           theme = {
             meta: {
               colors: {
@@ -279,19 +288,19 @@ function runTestSuite(componentType) {
             }
           };
 
-      mount(<ComponentUnderTest />, theme, {styletron: localStyletron});
+      return mount(<ComponentUnderTest />, theme, {styletron: localStyletron})
+        .then(() => {
+          const styles     = localStyletron.getCss(),
+                shouldFind = ['border-color:#654321', 'background-color:rgba(44,33,22,0.11)'];
 
-      const styles     = localStyletron.getCss(),
-            shouldFind = ['border-color:#654321', 'background-color:rgba(44,33,22,0.11)'];
-
-      t.plan(shouldFind.length);
-      shouldFind.forEach(oneNeedle => {
-        t.equal(styles.indexOf(oneNeedle) >= 0, true, 'middleware should be applied');
-      });
+          shouldFind.forEach(oneNeedle => {
+            t.equal(styles.indexOf(oneNeedle) >= 0, true, 'middleware should be applied');
+          });
+        });
     });
 
     maybeTest(componentName, `Styled component lets the library install its own meta (type: ${componentType})`, t => {
-      let localStyletron = new Styletron(),
+      let localStyletron = new StyletronServer(),
           libraryMeta = {     // library meta overrides the default theme
             colors: {
               chilly: 'library-chilly',
@@ -311,43 +320,43 @@ function runTestSuite(componentType) {
           };
 
       installLibraryMeta(libraryMeta);
-      mount(<ComponentUnderTest />, theme, {styletron: localStyletron});
-      installLibraryMeta({});   // (there is no automatic cleanup for this feature)
+      return mount(<ComponentUnderTest />, theme, {styletron: localStyletron})
+        .then(() => {
+          installLibraryMeta({});   // (there is no automatic cleanup for this feature)
+          const styles        = localStyletron.getCss(),
+                shouldFind    = ['border-color:usertheme-chilly', 'background-color:library-sweaty'],
+                shouldNotFind = ['border-color:library-chilly', 'background-color:usertheme-sweaty'];
 
-      const styles        = localStyletron.getCss(),
-            shouldFind    = ['border-color:usertheme-chilly', 'background-color:library-sweaty'],
-            shouldNotFind = ['border-color:library-chilly', 'background-color:usertheme-sweaty'];
-
-      t.plan(shouldFind.length + shouldNotFind.length);
-      shouldFind.forEach(oneNeedle => {
-        t.equal(styles.indexOf(oneNeedle) >= 0, true, 'library meta should be applied before the user theme');
-      });
-      shouldNotFind.forEach(oneAbsentNeedle => {
-        t.equal(styles.indexOf(oneAbsentNeedle) >= 0, false, 'user theme should override library meta');
-      });
+          shouldFind.forEach(oneNeedle => {
+            t.equal(styles.indexOf(oneNeedle) >= 0, true, 'library meta should be applied before the user theme');
+          });
+          shouldNotFind.forEach(oneAbsentNeedle => {
+            t.equal(styles.indexOf(oneAbsentNeedle) >= 0, false, 'user theme should override library meta');
+          });
+        });
     });
 
     t.test(`Styled component lets the user override default styles per component with inline styles (type: ${componentType})`, t => {
-      let localStyletron = new Styletron(),
+      let localStyletron = new StyletronServer(),
           customStyles = {
             fontSize: '88px',
             zIndex:   '888',
             color:    'lime'
           };
 
-      mount(<ComponentUnderTest style={customStyles} />, null, {styletron: localStyletron});
+      return mount(<ComponentUnderTest style={customStyles} />, null, {styletron: localStyletron})
+        .then(() => {
+          const styles        = localStyletron.getCss(),
+                shouldFind    = ['color:lime', 'font-size:88px', 'z-index:888', 'font-weight:700'],
+                shouldNotFind = ['font-size:33px', 'z-index:333'];
 
-      const styles        = localStyletron.getCss(),
-            shouldFind    = ['color:lime', 'font-size:88px', 'z-index:888', 'font-weight:700'],
-            shouldNotFind = ['font-size:33px', 'z-index:333'];
-
-      t.plan(shouldFind.length + shouldNotFind.length);
-      shouldFind.forEach(oneNeedle => {
-        t.equal(styles.indexOf(oneNeedle) >= 0, true, 'inline styles should be applied');
-      });
-      shouldNotFind.forEach(oneAbsentNeedle => {
-        t.equal(styles.indexOf(oneAbsentNeedle) >= 0, false, 'inline styles should override base styles');
-      });
+          shouldFind.forEach(oneNeedle => {
+            t.equal(styles.indexOf(oneNeedle) >= 0, true, 'inline styles should be applied');
+          });
+          shouldNotFind.forEach(oneAbsentNeedle => {
+            t.equal(styles.indexOf(oneAbsentNeedle) >= 0, false, 'inline styles should override base styles');
+          });
+        });
     });
 
     t.end();
@@ -378,7 +387,7 @@ class TestRenderCallbackProps extends Component {
   }
 }
 
-tape.test('styled component passes all props to render callback', t => {
+tape.test('Styled component passes all props to render callback', t => {
 
   let customProps = {
         id: '44',
@@ -386,27 +395,29 @@ tape.test('styled component passes all props to render callback', t => {
       },
       receivedProps;
   anythingWatcher.start(props => {receivedProps = props;});
-  mount(<TestRenderCallbackProps {...customProps} />);
-  anythingWatcher.end();
+  return mount(<TestRenderCallbackProps {...customProps} />)
+    .then(() => {
+      anythingWatcher.end();
 
-  t.equal(receivedProps.id, customProps.id, 'render callback should receive full props object');
-  t.equal(receivedProps['data-things'], customProps['data-things'], 'render callback should receive full props object');
-  t.end();
+      t.equal(receivedProps.id, customProps.id, 'render callback should receive full props object');
+      t.equal(receivedProps['data-things'], customProps['data-things'], 'render callback should receive full props object');
+    });
 });
 
-tape.test('styled component passes component theme to render callback (not overridden)', t => {
+tape.test('Styled component passes component theme to render callback (not overridden)', t => {
 
   let receivedTheme;
   anythingWatcher.start((props, paramBlock) => receivedTheme = paramBlock.componentTheme);
-  mount(<TestRenderCallbackProps />);
-  anythingWatcher.end();
+  return mount(<TestRenderCallbackProps />)
+    .then(() => {
+      anythingWatcher.end();
 
-  t.equal(receivedTheme.fontSize, staticStyle.fontSize, 'render callback should receive static styles');
-  t.equal(receivedTheme.zIndex, staticStyle.zIndex, 'render callback should receive static styles');
-  t.end();
+      t.equal(receivedTheme.fontSize, staticStyle.fontSize, 'render callback should receive static styles');
+      t.equal(receivedTheme.zIndex, staticStyle.zIndex, 'render callback should receive static styles');
+    });
 });
 
-tape.test('styled component passes component theme to render callback (with overridden theme)', t => {
+tape.test('Styled component passes component theme to render callback (with overridden theme)', t => {
 
   let userTheme = {
         TestRenderCallbackProps: {
@@ -417,15 +428,16 @@ tape.test('styled component passes component theme to render callback (with over
       receivedTheme;
 
   anythingWatcher.start((props, paramBlock) => receivedTheme = paramBlock.componentTheme);
-  mount(<TestRenderCallbackProps />, userTheme);
-  anythingWatcher.end();
+  return mount(<TestRenderCallbackProps />, userTheme)
+    .then(() => {
+      anythingWatcher.end();
 
-  t.equal(receivedTheme.fontSize, '99px', 'render callback should receive overridden theme styles');
-  t.equal(receivedTheme.zIndex, '999', 'render callback should receive overridden theme styles');
-  t.end();
+      t.equal(receivedTheme.fontSize, '99px', 'render callback should receive overridden theme styles');
+      t.equal(receivedTheme.zIndex, '999', 'render callback should receive overridden theme styles');
+    });
 });
 
-tape.test('styled component passes global meta to render callback', t => {
+tape.test('Styled component passes global meta to render callback', t => {
 
   let userTheme = {
         TestRenderCallbackProps: {
@@ -442,12 +454,13 @@ tape.test('styled component passes global meta to render callback', t => {
       receivedMeta;
 
   anythingWatcher.start((props, paramBlock) => receivedMeta = paramBlock.globalMeta);
-  mount(<TestRenderCallbackProps />, userTheme);
-  anythingWatcher.end();
+  return mount(<TestRenderCallbackProps />, userTheme)
+    .then(() => {
+      anythingWatcher.end();
 
-  t.equal(receivedMeta.ocean, '11', 'render callback should receive global meta');
-  t.equal(receivedMeta.colors.bluish, '#204899', 'render callback should receive global meta');
-  t.end();
+      t.equal(receivedMeta.ocean, '11', 'render callback should receive global meta');
+      t.equal(receivedMeta.colors.bluish, '#204899', 'render callback should receive global meta');
+    });
 });
 
 
@@ -474,23 +487,23 @@ tape.test('styled component offers "classify" method to assist with subcomponent
   let classes = null;
 
   anythingWatcher.start(subcomponentClasses => classes = subcomponentClasses);
-  mount(<TestClassify />);
-  anythingWatcher.end();
+  return mount(<TestClassify />)
+    .then(() => {
+      anythingWatcher.end();
 
-  t.equal(typeof classes, 'string', 'classify should return a string');
-  t.equal(classes.length, 5, 'classify string should be exactly 5 characters long')
-  t.equal(classes.split(' ').length, 3, 'classify should return three classes, from three style attributes')
-  t.end();
+      t.equal(typeof classes, 'string', 'classify should return a string');
+      t.equal(classes.split(' ').length, 3, 'classify should return three classes, from three style attributes')
+    });
 });
 
 tape.test('classify applies middleware correctly', t => {
-  let localStyletron = new Styletron(),
+  let localStyletron = new StyletronServer(),
       theme = { meta: { colors: { 'guldan': '#590499' } } };    // no actual components; just a meta is needed here
 
-  mount(<TestClassify />, theme, {styletron: localStyletron});
+  return mount(<TestClassify />, theme, {styletron: localStyletron})
+    .then(() => {
+      const styles = localStyletron.getCss();
 
-  const styles = localStyletron.getCss();
-
-  t.equal(styles.indexOf('color:#590499') >= 0, true, 'middleware should be applied');
-  t.end();
+      t.equal(styles.indexOf('color:#590499') >= 0, true, 'middleware should be applied');
+    });
 });

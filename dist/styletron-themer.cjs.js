@@ -7,7 +7,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var React = require('react');
 var React__default = _interopDefault(React);
 var PropTypes = _interopDefault(require('prop-types'));
-var styletronUtils = require('styletron-utils');
+var styletronEngineAtomic = require('styletron-engine-atomic');
 
 /*!
  * is-primitive <https://github.com/jonschlinkert/is-primitive>
@@ -16,12 +16,15 @@ var styletronUtils = require('styletron-utils');
  * Licensed under the MIT License.
  */
 
-'use strict';
-
 // see http://jsperf.com/testing-value-is-primitive/7
 var isPrimitive = function isPrimitive(value) {
   return value == null || (typeof value !== 'function' && typeof value !== 'object');
 };
+
+var isPrimitive$1 = /*#__PURE__*/Object.freeze({
+  default: isPrimitive,
+  __moduleExports: isPrimitive
+});
 
 /*!
  * assign-symbols <https://github.com/jonschlinkert/assign-symbols>
@@ -29,8 +32,6 @@ var isPrimitive = function isPrimitive(value) {
  * Copyright (c) 2015, Jon Schlinkert.
  * Licensed under the MIT License.
  */
-
-'use strict';
 
 var assignSymbols = function(receiver, objects) {
   if (receiver === null || typeof receiver === 'undefined') {
@@ -63,6 +64,11 @@ var assignSymbols = function(receiver, objects) {
   }
   return target;
 };
+
+var assignSymbols$1 = /*#__PURE__*/Object.freeze({
+  default: assignSymbols,
+  __moduleExports: assignSymbols
+});
 
 var toString = Object.prototype.toString;
 
@@ -205,20 +211,18 @@ function isBuffer(val) {
     && val.constructor.isBuffer(val);
 }
 
-/*!
- * assign-deep <https://github.com/jonschlinkert/assign-deep>
- *
- * Copyright (c) 2017, Jon Schlinkert.
- * Released under the MIT License.
- */
+var kindOf$1 = /*#__PURE__*/Object.freeze({
+  default: kindOf,
+  __moduleExports: kindOf
+});
 
-'use strict';
+var isPrimitive$2 = ( isPrimitive$1 && isPrimitive ) || isPrimitive$1;
 
+var assignSymbols$2 = ( assignSymbols$1 && assignSymbols ) || assignSymbols$1;
 
+var typeOf = ( kindOf$1 && kindOf ) || kindOf$1;
 
-
-
-function assign$1(target/*, objects*/) {
+function assign(target/*, objects*/) {
   target = target || {};
   var len = arguments.length, i = 0;
   if (len === 1) {
@@ -226,7 +230,7 @@ function assign$1(target/*, objects*/) {
   }
   while (++i < len) {
     var val = arguments[i];
-    if (isPrimitive(target)) {
+    if (isPrimitive$2(target)) {
       target = val;
     }
     if (isObject(val)) {
@@ -241,16 +245,16 @@ function assign$1(target/*, objects*/) {
  */
 
 function extend(target, obj) {
-  assignSymbols(target, obj);
+  assignSymbols$2(target, obj);
 
   for (var key in obj) {
     if (hasOwn(obj, key)) {
       var val = obj[key];
       if (isObject(val)) {
-        if (kindOf(target[key]) === 'undefined' && kindOf(val) === 'function') {
+        if (typeOf(target[key]) === 'undefined' && typeOf(val) === 'function') {
           target[key] = val;
         }
-        target[key] = assign$1(target[key] || {}, val);
+        target[key] = assign(target[key] || {}, val);
       } else {
         target[key] = val;
       }
@@ -264,7 +268,7 @@ function extend(target, obj) {
  */
 
 function isObject(obj) {
-  return kindOf(obj) === 'object' || kindOf(obj) === 'function';
+  return typeOf(obj) === 'object' || typeOf(obj) === 'function';
 }
 
 /**
@@ -279,135 +283,13 @@ function hasOwn(obj, key) {
  * Expose `assign`
  */
 
-var assignDeep = assign$1;
+var assignDeep = assign;
 
-var babelHelpers = {};
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
 } : function (obj) {
   return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 };
-
-
-
-
-
-var asyncGenerator = function () {
-  function AwaitValue(value) {
-    this.value = value;
-  }
-
-  function AsyncGenerator(gen) {
-    var front, back;
-
-    function send(key, arg) {
-      return new Promise(function (resolve, reject) {
-        var request = {
-          key: key,
-          arg: arg,
-          resolve: resolve,
-          reject: reject,
-          next: null
-        };
-
-        if (back) {
-          back = back.next = request;
-        } else {
-          front = back = request;
-          resume(key, arg);
-        }
-      });
-    }
-
-    function resume(key, arg) {
-      try {
-        var result = gen[key](arg);
-        var value = result.value;
-
-        if (value instanceof AwaitValue) {
-          Promise.resolve(value.value).then(function (arg) {
-            resume("next", arg);
-          }, function (arg) {
-            resume("throw", arg);
-          });
-        } else {
-          settle(result.done ? "return" : "normal", result.value);
-        }
-      } catch (err) {
-        settle("throw", err);
-      }
-    }
-
-    function settle(type, value) {
-      switch (type) {
-        case "return":
-          front.resolve({
-            value: value,
-            done: true
-          });
-          break;
-
-        case "throw":
-          front.reject(value);
-          break;
-
-        default:
-          front.resolve({
-            value: value,
-            done: false
-          });
-          break;
-      }
-
-      front = front.next;
-
-      if (front) {
-        resume(front.key, front.arg);
-      } else {
-        back = null;
-      }
-    }
-
-    this._invoke = send;
-
-    if (typeof gen.return !== "function") {
-      this.return = undefined;
-    }
-  }
-
-  if (typeof Symbol === "function" && Symbol.asyncIterator) {
-    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
-      return this;
-    };
-  }
-
-  AsyncGenerator.prototype.next = function (arg) {
-    return this._invoke("next", arg);
-  };
-
-  AsyncGenerator.prototype.throw = function (arg) {
-    return this._invoke("throw", arg);
-  };
-
-  AsyncGenerator.prototype.return = function (arg) {
-    return this._invoke("return", arg);
-  };
-
-  return {
-    wrap: function (fn) {
-      return function () {
-        return new AsyncGenerator(fn.apply(this, arguments));
-      };
-    },
-    await: function (value) {
-      return new AwaitValue(value);
-    }
-  };
-}();
-
-
-
-
 
 var classCallCheck = function (instance, Constructor) {
   if (!(instance instanceof Constructor)) {
@@ -433,13 +315,34 @@ var createClass = function () {
   };
 }();
 
+var defineProperty = function (obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
 
+  return obj;
+};
 
+var _extends = Object.assign || function (target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i];
 
+    for (var key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        target[key] = source[key];
+      }
+    }
+  }
 
-
-
-
+  return target;
+};
 
 var inherits = function (subClass, superClass) {
   if (typeof superClass !== "function" && superClass !== null) {
@@ -456,14 +359,6 @@ var inherits = function (subClass, superClass) {
   });
   if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
 };
-
-
-
-
-
-
-
-
 
 var objectWithoutProperties = function (obj, keys) {
   var target = {};
@@ -485,63 +380,65 @@ var possibleConstructorReturn = function (self, call) {
   return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
 
+function getDisplayName(Component) {
+  var name = Component.displayName || Component.name;
+  if (name) return name;
 
+  if (typeof Component === 'string') return Component;
 
+  if (typeof Component.type === 'string') return Component.type;
 
+  if (Component.type === React__default.Fragment) return 'Fragment';
 
+  if (typeof Component.type === 'function') return getDisplayName(Component.type);
 
+  return 'Unknown';
+}
 
+function isObject$1(item) {
+  return (typeof item === 'undefined' ? 'undefined' : _typeof(item)) === "object" && !Array.isArray(item) && item !== null;
+}
 
+var ThemeContext = React.createContext();
+var StyletronContext = React.createContext();
 
-
-
-
-
-
-
-
-
-
-
-
-
-babelHelpers;
-
-var _class;
-var _temp;
-
-var testMode = process.env.NODE_ENV === 'TEST';
-var emptyThemeProvider = { theme: { meta: { globalMeta: {} } } };
-
-var Styled = (_temp = _class = function (_Component) {
-  inherits(Styled, _Component);
-
-  // we pull context from above
-  function Styled(props, context) {
-    classCallCheck(this, Styled);
-
-    var _this = possibleConstructorReturn(this, (Styled.__proto__ || Object.getPrototypeOf(Styled)).call(this, props, context));
-
-    _this.classify = function (styletronObject) {
-      try {
-        return styletronUtils.injectStylePrefixed(_this.context.styletron, _this.context.themeProvider.applyMiddleware(styletronObject));
-      } catch (e) {
-        return '';
-      }
-    };
-
-    if (!context.themeProvider && !testMode) console.error('Styled components must be rendered inside a ThemeProvider.'); // eslint-disable-line
-
-    if (!context.styletron && !testMode) console.error('Styled components must be rendered inside a StyletronProvider.'); // eslint-disable-line
-
-    _this.componentName = props.themeName;
-
-    // ensure that the component's static style is inserted into the master theme.
-    // unnamed components are not installed into the theme; see getComponentTheme() below
-    //
-    if (_this.componentName && context.themeProvider) context.themeProvider.installComponent(_this.componentName, props.staticStyle || {});
-    return _this;
+var emptyThemeContext = {
+  applyMiddleware: function applyMiddleware() {},
+  theme: {
+    meta: {
+      globalMeta: {}
+    }
   }
+};
+
+function asConsumer(RootComponent) {
+  function Consumer(props) {
+    return React__default.createElement(
+      ThemeContext.Consumer,
+      null,
+      function (themeContext) {
+        return React__default.createElement(
+          StyletronContext.Consumer,
+          null,
+          function (styletron) {
+            return React__default.createElement(RootComponent, _extends({}, props, {
+              themeContext: themeContext || emptyThemeContext,
+              styletron: styletron || {}
+            }));
+          }
+        );
+      }
+    );
+  }
+
+  Consumer.displayName = 'Consumer_' + getDisplayName(RootComponent);
+  return Consumer;
+}
+
+var _class, _class2, _temp;
+
+var Styled = asConsumer(_class = (_temp = _class2 = function (_Component) {
+  inherits(Styled, _Component);
 
   /*
    every styled component can take several props which allow you to override
@@ -559,10 +456,40 @@ var Styled = (_temp = _class = function (_Component) {
      not the entire subtree
   */
 
+  function Styled(props) {
+    classCallCheck(this, Styled);
+
+    var _this = possibleConstructorReturn(this, (Styled.__proto__ || Object.getPrototypeOf(Styled)).call(this, props));
+
+    _this.state = { ready: false };
+
+    _this.classify = function (styletronObject) {
+
+      if (!_this.state.ready) return '';
+
+      try {
+        return _this.props.styletron.renderStyle(_this.props.themeContext.applyMiddleware(styletronObject));
+      } catch (e) {
+        return '';
+      }
+    };
+
+    var componentName = _this.componentName = props.themeName;
+
+    if (componentName && props.themeContext && props.themeContext.installComponent && !props.themeContext.isReady(componentName)) {
+      _this.props.themeContext.installComponent(componentName, props.staticStyle || {}).then(function () {
+        _this.setState({ ready: true });
+      });
+    } else {
+      _this.state = { ready: true };
+    }
+    return _this;
+  }
+
   createClass(Styled, [{
     key: 'getRootTheme',
     value: function getRootTheme() {
-      if (this.componentName && this.context.themeProvider) return this.context.themeProvider.theme[this.componentName];
+      if (this.componentName && this.props.themeContext) return this.props.themeContext.theme[this.componentName];
       return this.props.staticStyle; // for unthemed (unnamed) components
     }
   }, {
@@ -580,23 +507,21 @@ var Styled = (_temp = _class = function (_Component) {
   }, {
     key: 'getStyle',
     value: function getStyle() {
-      var _context$themeProvide = this.context.themeProvider,
-          themeProvider = _context$themeProvide === undefined ? emptyThemeProvider : _context$themeProvide,
+      var themeContext = this.props.themeContext,
           componentTheme = this.getComponentTheme(),
           styleObj = void 0;
 
       // use the component's dynamic styling function to adjust the styles for this instance
       // based on props
       //
-
-      if (typeof this.props.dynamicStyle === 'function') {
+      if (typeof this.props.dynamicStyle === 'function' && this.state.ready) {
         styleObj = this.props.dynamicStyle({
 
           // the base theme for this component
           componentTheme: componentTheme,
 
           // the global meta (for colors and other global attributes)
-          globalMeta: themeProvider.theme.meta,
+          globalMeta: themeContext.theme.meta,
 
           // last, but not least, the props
           props: this.props
@@ -618,25 +543,27 @@ var Styled = (_temp = _class = function (_Component) {
   }, {
     key: 'render',
     value: function render() {
+      if (!this.state.ready) return null;
+
       var styleProperties = this.getStyle(),
           _props = this.props,
           className = _props.className,
           children = _props.children,
+          themeContext = _props.themeContext,
+          styletron = _props.styletron,
           themeName = _props.themeName,
           staticStyle = _props.staticStyle,
           dynamicStyle = _props.dynamicStyle,
           localTheme = _props.localTheme,
           style = _props.style,
-          passThroughProps = objectWithoutProperties(_props, ['className', 'children', 'themeName', 'staticStyle', 'dynamicStyle', 'localTheme', 'style']),
-          _context$themeProvide2 = this.context.themeProvider,
-          themeProvider = _context$themeProvide2 === undefined ? emptyThemeProvider : _context$themeProvide2,
+          passThroughProps = objectWithoutProperties(_props, ['className', 'children', 'themeContext', 'styletron', 'themeName', 'staticStyle', 'dynamicStyle', 'localTheme', 'style']),
           styletronClasses = this.classify(styleProperties),
           paramBlock = {
         // the base theme of your component
         componentTheme: this.getComponentTheme(),
 
         // the global meta (for colors, etc)
-        globalMeta: themeProvider.theme.meta,
+        globalMeta: themeContext.theme.meta,
 
         // easy access to "classify", for building classes for sub-components
         classify: this.classify
@@ -657,18 +584,7 @@ var Styled = (_temp = _class = function (_Component) {
     }
   }]);
   return Styled;
-}(React.Component), _class.contextTypes = {
-
-  // from StyletronProvider (see styletron-react)
-  styletron: PropTypes.object,
-
-  // from ThemeProvider
-  themeProvider: PropTypes.shape({
-    theme: PropTypes.object.isRequired,
-    installComponent: PropTypes.func.isRequired,
-    applyMiddleware: PropTypes.func.isRequired
-  })
-}, _class.propTypes = {
+}(React.Component), _class2.propTypes = {
   // basic props
   themeName: PropTypes.string, // unnamed components are not themeable; useful for one-offs
   staticStyle: PropTypes.object,
@@ -679,9 +595,13 @@ var Styled = (_temp = _class = function (_Component) {
   style: PropTypes.object,
   localTheme: PropTypes.object,
 
+  // from context wrappers
+  themeContext: PropTypes.object,
+  styletron: PropTypes.object,
+
   // we only accept a render callback function for children
   children: PropTypes.func.isRequired
-}, _temp);
+}, _temp)) || _class;
 
 var libraryMeta = {};
 
@@ -693,18 +613,14 @@ function getDefaultTheme() {
   return { meta: libraryMeta };
 }
 
-function isObject$1(item) {
-  return (typeof item === 'undefined' ? 'undefined' : _typeof(item)) === "object" && !Array.isArray(item) && item !== null;
-}
-
 /*
   this module doesn't provide generic tools for middleware management.
   it simply provides a single middleware tool for color mapping.
 */
 
-var fullTextSearch = ['background', 'border', 'outline'];
-var contains = ['border', 'background', 'outline', 'hadow'];
-var svgAttributes = ['stroke', 'fill'];
+var fullTextSearch = ['background', 'border', 'outline'],
+    contains = ['border', 'background', 'outline', 'hadow'],
+    svgAttributes = ['stroke', 'fill'];
 
 function isKeyColorRelated(key) {
 
@@ -803,106 +719,228 @@ function mapColorKeys(theme, styles) {
   return styleDive(theme, styles, isKeyColorRelated, colorValueMapper.bind(null, theme)).styles;
 }
 
-var availableMiddlewares = Object.freeze({
-	mapColorKeys: mapColorKeys
+var availableMiddlewares = /*#__PURE__*/Object.freeze({
+  mapColorKeys: mapColorKeys
 });
-
-var _class$1;
-var _temp$1;
 
 /**
  * Main wrapper component to enable theming of UI components.
  */
-var ThemeProvider = (_temp$1 = _class$1 = function (_Component) {
+
+var ThemeProvider = function (_Component) {
   inherits(ThemeProvider, _Component);
-  createClass(ThemeProvider, [{
-    key: 'getChildContext',
 
-
-    // pass these down on context
-    value: function getChildContext() {
-      return {
-        themeProvider: {
-          theme: this.theme,
-          middlewares: this.middlewares,
-          installComponent: this.installComponent,
-          applyMiddleware: this.applyMiddleware
-        }
-      };
-    }
-
-    // we pull context from above (for nested themes)
-
-  }]);
-
-  function ThemeProvider(props, context) {
+  function ThemeProvider(props) {
     classCallCheck(this, ThemeProvider);
 
-    // do a deep merge with the library theme and the user's overrides. theming is
-    // a one-shot deal; we do not currently support dynamic themes (i.e., if you
-    // change the theme prop, nothing will change)
-    //
-    var _this = possibleConstructorReturn(this, (ThemeProvider.__proto__ || Object.getPrototypeOf(ThemeProvider)).call(this, props, context));
+    var _this = possibleConstructorReturn(this, (ThemeProvider.__proto__ || Object.getPrototypeOf(ThemeProvider)).call(this, props));
+
+    _this.isReady = function (componentName) {
+      return _this.readyComponents.indexOf(componentName) !== -1;
+    };
+
+    _this.setReady = function (componentName) {
+      _this.readyComponents.push(componentName);
+    };
 
     _this.installComponent = function (componentName, componentTheme) {
-      if (_this.installedComponents.indexOf(componentName) === -1) {
-        _this.theme[componentName] = assignDeep({}, componentTheme, _this.theme[componentName]);
-        _this.installedComponents.push(componentName);
-      }
+
+      if (_this.isReady(componentName)) return Promise.resolve();
+
+      // if we're in the middle of an installation of another instance of this component...
+      if (_this.wip[componentName]) return _this.wip[componentName];
+
+      return _this.wip[componentName] = new Promise(function (resolve) {
+        _this.setState(function (prevState) {
+          return {
+            theme: _extends({}, prevState.theme, defineProperty({}, componentName, assignDeep({}, componentTheme, prevState.theme[componentName])))
+          };
+        }, function () {
+          _this.setReady(componentName);
+          _this.wip[componentName] = null;
+          resolve();
+        });
+      });
     };
 
     _this.applyMiddleware = function (styleObj) {
-      return _this.middlewares.reduce(function (styleObj, mw) {
-        return mw(_this.theme, styleObj);
+      return _this.state.middlewares.reduce(function (styleObj, mw) {
+        return mw(_this.state.theme, styleObj);
       }, styleObj);
     };
 
-    var _ref = (context || {}).themeProvider || {},
-        parentTheme = _ref.theme;
-
-    _this.theme = assignDeep({}, getDefaultTheme(), parentTheme, props.theme);
-    _this.middlewares = props.middlewares || [mapColorKeys];
-    _this.installedComponents = [];
+    _this.state = {
+      theme: assignDeep({}, getDefaultTheme(), _this.getParentThemeContext().theme, _this.props.theme),
+      middlewares: _this.props.middlewares || [mapColorKeys],
+      installComponent: _this.installComponent,
+      applyMiddleware: _this.applyMiddleware,
+      isReady: _this.isReady
+    };
+    _this.readyComponents = [];
+    _this.wip = {};
     return _this;
   }
 
-  // each styled component will be added to the master theme, with a key that
-  // matches its name:
-  //    fullTheme = {meta:{}, Button:{}, Icon:{} ... }
-  //
-
-
   createClass(ThemeProvider, [{
+    key: 'getParentThemeContext',
+    value: function getParentThemeContext() {
+      return this.props.themeContext || {};
+    }
+
+    // each styled component will be added to the master theme, with a key that
+    // matches its name:
+    //    fullTheme = {meta:{}, Button:{}, Icon:{} ... }
+    //
+
+  }, {
     key: 'render',
     value: function render() {
-      return React__default.Children.only(this.props.children);
+      return React__default.createElement(
+        ThemeContext.Provider,
+        { value: this.state },
+        this.props.children
+      );
     }
   }]);
   return ThemeProvider;
-}(React.Component), _class$1.childContextTypes = {
-  themeProvider: PropTypes.shape({
-    theme: PropTypes.object.isRequired,
-    middlewares: PropTypes.array,
-    installComponent: PropTypes.func,
-    applyMiddleware: PropTypes.func
-  })
-}, _class$1.contextTypes = {
-  themeProvider: PropTypes.shape({
-    theme: PropTypes.object.isRequired
-  })
-}, _temp$1);
+}(React.Component);
+
+/**
+ * propTypes
+ * @property {object} theme - Theme object in json format. Used instead of css.
+ * @property {array}  middlewares - Array of methods to manipulate the style object before it's passed to styletron.
+ */
+
 
 ThemeProvider.propTypes = {
+  themeContext: PropTypes.object,
   theme: PropTypes.object,
   middlewares: PropTypes.arrayOf(PropTypes.func),
   children: PropTypes.node
 };
 
+var NestedThemeProvider = asConsumer(ThemeProvider);
+
 // provided as a convenient export for consumers. it is not
 // used directly by this component.
 //
-ThemeProvider.middlewares = availableMiddlewares;
+NestedThemeProvider.middlewares = ThemeProvider.middlewares = availableMiddlewares;
+
+var StyletronProvider = function (_Component) {
+  inherits(StyletronProvider, _Component);
+
+  function StyletronProvider() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
+    classCallCheck(this, StyletronProvider);
+
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = possibleConstructorReturn(this, (_ref = StyletronProvider.__proto__ || Object.getPrototypeOf(StyletronProvider)).call.apply(_ref, [this].concat(args))), _this), _this.state = { styletron: null }, _temp), possibleConstructorReturn(_this, _ret);
+  }
+
+  createClass(StyletronProvider, [{
+    key: 'render',
+    value: function render() {
+      return React__default.createElement(
+        StyletronContext.Provider,
+        { value: this.state.styletron },
+        this.props.children
+      );
+    }
+  }], [{
+    key: 'getDerivedStateFromProps',
+    value: function getDerivedStateFromProps(_ref2) {
+      var styletron = _ref2.styletron;
+
+      if (styletron) return { styletron: styletron };
+    }
+  }]);
+  return StyletronProvider;
+}(React.Component);
+
+
+StyletronProvider.propTypes = {
+  styletron: PropTypes.object,
+  children: PropTypes.node
+};
+
+function LibraryProvider(props) {
+  var _ref = props || {},
+      theme = _ref.theme,
+      middlewares = _ref.middlewares,
+      children = _ref.children,
+      _ref$styletron = _ref.styletron,
+      styletron = _ref$styletron === undefined ? new styletronEngineAtomic.Client() : _ref$styletron;
+
+  var mw = middlewares ? [NestedThemeProvider.middlewares.mapColorKeys].concat(middlewares) : null;
+  return React__default.createElement(
+    ThemeProvider,
+    { theme: theme, middlewares: mw },
+    React__default.createElement(
+      StyletronProvider,
+      { styletron: styletron },
+      children
+    )
+  );
+}
+
+LibraryProvider.propTypes = {
+  theme: PropTypes.object,
+  styletron: PropTypes.object,
+  middlewares: PropTypes.array
+};
+
+/* eslint-disable react/prop-types */
+
+/**
+ * HoC for styling a Styled component (or any component
+ *   that intelligently response to a "style" prop)
+ *
+ * usage:
+ *   const PinkButton = withStyle({color: 'pink'})(Button);
+ *   <PinkButton />
+ *
+ */
+
+var withStyle = function withStyle(style) {
+  return function (RootComponent) {
+    var _class, _temp;
+
+    var WithStyleHoC = (_temp = _class = function (_React$Component) {
+      inherits(WithStyleHoC, _React$Component);
+
+      function WithStyleHoC() {
+        classCallCheck(this, WithStyleHoC);
+        return possibleConstructorReturn(this, (WithStyleHoC.__proto__ || Object.getPrototypeOf(WithStyleHoC)).apply(this, arguments));
+      }
+
+      createClass(WithStyleHoC, [{
+        key: 'render',
+        value: function render() {
+          var _props = this.props,
+              userStyle = _props.style,
+              props = objectWithoutProperties(_props, ['style']),
+              mergedStyle = userStyle ? assignDeep({}, style, userStyle) : style;
+
+          return React__default.createElement(RootComponent, _extends({ style: mergedStyle }, props));
+        }
+      }]);
+      return WithStyleHoC;
+    }(React__default.Component), _class.displayName = 'WithStyle_' + getDisplayName(RootComponent), _temp);
+
+    return WithStyleHoC;
+  };
+};
 
 exports.Styled = Styled;
-exports.ThemeProvider = ThemeProvider;
+exports.ThemeProvider = NestedThemeProvider;
+exports.StyletronProvider = StyletronProvider;
+exports.LibraryProvider = LibraryProvider;
+exports.RootThemeProvider = ThemeProvider;
 exports.installLibraryMeta = installLibraryMeta;
+exports.withStyle = withStyle;

@@ -1,55 +1,40 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import assignDeep from 'assign-deep';
-
 import getDefaultTheme from './default-theme';
 import * as availableMiddlewares from './middlewares';
+import {asConsumer} from './consumer';
+import {ThemeContext} from './contexts';
 
 
 /**
  * Main wrapper component to enable theming of UI components.
  */
-export default class ThemeProvider extends Component {
+class ThemeProvider extends Component {
 
-  // pass these down on context
-  static childContextTypes = {
-    themeProvider: PropTypes.shape({
-      theme:            PropTypes.object.isRequired,
-      middlewares:      PropTypes.array,
-      installComponent: PropTypes.func,
-      applyMiddleware:  PropTypes.func
-    })
-  };
-
-  // we pull context from above (for nested themes)
-  static contextTypes = {
-    themeProvider: PropTypes.shape({
-      theme: PropTypes.object.isRequired
-    })
-  };
-
-  getChildContext() {
-    return {
-      themeProvider: {
-        theme:            this.theme,
-        middlewares:      this.middlewares,
-        installComponent: this.installComponent,
-        applyMiddleware:  this.applyMiddleware
-      }
+  constructor(props) {
+    super(props);
+    this.state = {
+      theme:            assignDeep({}, getDefaultTheme(), this.getParentThemeContext().theme, this.props.theme),
+      middlewares:      this.props.middlewares || [availableMiddlewares.mapColorKeys],
+      installComponent: this.installComponent,
+      applyMiddleware:  this.applyMiddleware,
+      isReady:          this.isReady
     };
+    this.readyComponents = [];
+    this.wip = {};
   }
 
-  constructor(props, context) {
-    super(props, context);
+  isReady = componentName => {
+    return this.readyComponents.indexOf(componentName) !== -1;
+  }
 
-    // do a deep merge with the library theme and the user's overrides. theming is
-    // a one-shot deal; we do not currently support dynamic themes (i.e., if you
-    // change the theme prop, nothing will change)
-    //
-    const {theme: parentTheme} = (context || {}).themeProvider || {};
-    this.theme               = assignDeep({}, getDefaultTheme(), parentTheme, props.theme);
-    this.middlewares         = props.middlewares || [availableMiddlewares.mapColorKeys];
-    this.installedComponents = [];
+  setReady = componentName => {
+    this.readyComponents.push(componentName);
+  }
+
+  getParentThemeContext() {
+    return this.props.themeContext || {};
   }
 
   // each styled component will be added to the master theme, with a key that
@@ -57,22 +42,42 @@ export default class ThemeProvider extends Component {
   //    fullTheme = {meta:{}, Button:{}, Icon:{} ... }
   //
   installComponent = (componentName, componentTheme) => {
-    if (this.installedComponents.indexOf(componentName) === -1) {
-      this.theme[componentName] = assignDeep({}, componentTheme, this.theme[componentName]);
-      this.installedComponents.push(componentName);
-    }
+
+    if (this.isReady(componentName))
+      return Promise.resolve();
+
+    // if we're in the middle of an installation of another instance of this component...
+    if (this.wip[componentName])
+      return this.wip[componentName];
+
+    return this.wip[componentName] = new Promise(resolve => {
+      this.setState(prevState => ({
+        theme: {
+          ...prevState.theme,
+          [componentName]: assignDeep({}, componentTheme, prevState.theme[componentName])
+        }
+      }), () => {
+        this.setReady(componentName);
+        this.wip[componentName] = null;
+        resolve();
+      });
+    });
   }
 
   applyMiddleware = styleObj => {
-    return this.middlewares
+    return this.state.middlewares
       .reduce(
-        (styleObj, mw) => mw(this.theme, styleObj),
+        (styleObj, mw) => mw(this.state.theme, styleObj),
         styleObj
       );
   }
 
   render() {
-    return React.Children.only(this.props.children);
+    return (
+      <ThemeContext.Provider value={this.state}>
+        {this.props.children}
+      </ThemeContext.Provider>
+    );
   }
 }
 
@@ -82,12 +87,21 @@ export default class ThemeProvider extends Component {
  * @property {array}  middlewares - Array of methods to manipulate the style object before it's passed to styletron.
  */
 ThemeProvider.propTypes = {
-  theme:       PropTypes.object,
-  middlewares: PropTypes.arrayOf(PropTypes.func),
-  children:    PropTypes.node
+  themeContext: PropTypes.object,
+  theme:        PropTypes.object,
+  middlewares:  PropTypes.arrayOf(PropTypes.func),
+  children:     PropTypes.node
 };
+
+// a Root theme provider must be used as the outermost wrapper.
+// nested providers use the default export
+//
+export {ThemeProvider as RootThemeProvider};
+
+const NestedThemeProvider = asConsumer(ThemeProvider);
+export default NestedThemeProvider;
 
 // provided as a convenient export for consumers. it is not
 // used directly by this component.
 //
-ThemeProvider.middlewares = availableMiddlewares;
+NestedThemeProvider.middlewares = ThemeProvider.middlewares = availableMiddlewares;

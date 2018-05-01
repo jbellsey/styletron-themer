@@ -1,9 +1,9 @@
 import tape from 'blue-tape';
 import React from 'react';
-import {miniMount} from './spec-helpers/helpers';
+import {mount as enzymeMount} from 'enzyme';
 import Styled from '../styled';
-import ThemeProvider from '../theme-provider';
-
+import ThemeProvider, {RootThemeProvider} from '../theme-provider';
+import {tick} from './spec-helpers/helpers';
 
 // a test wants to inspect the theme passed to the dynamic style function
 const dynamicStyleWatcher = renderWatcher => ({componentTheme}) => {
@@ -53,8 +53,8 @@ const TestThemeTransfer = ({staticStyle}) => (
 
 tape('theme provider merges themes from all child components', t => {
 
-  const tp = miniMount(
-    <ThemeProvider>
+  const wrapper = enzymeMount(
+    <RootThemeProvider>
       <span>
         <Test1 />
         <span>
@@ -63,10 +63,10 @@ tape('theme provider merges themes from all child components', t => {
           </span>
         </span>
       </span>
-    </ThemeProvider>
+    </RootThemeProvider>
   );
 
-  const theme = tp.instance().theme;
+  const theme = wrapper.state('theme');
   t.equal(theme.Test1.color, 'blue', 'first component should be installed into the theme');
   t.equal(theme.Test2.color, 'green', 'second component should be installed into the theme');
   t.equal(theme.Test2.meta.charles, 'in charge', 'component meta should be installed into the theme');
@@ -74,18 +74,34 @@ tape('theme provider merges themes from all child components', t => {
   t.end();
 });
 
+tape('theme provider accepts identical sibling components', t => {
+
+  const wrapper = enzymeMount(
+    <RootThemeProvider>
+      <Test1 />
+      <Test1 />
+      <Test1 />
+    </RootThemeProvider>
+  );
+
+  const theme = wrapper.state('theme');
+  t.equal(theme.Test1.color, 'blue', 'first component should be installed into the theme');
+
+  t.end();
+});
+
 tape('theme provider does not override styles once a component is installed', t => {
 
-  const tp = miniMount(
-    <ThemeProvider>
+  const wrapper = enzymeMount(
+    <RootThemeProvider>
       <span>
         <TestThemeTransfer staticStyle={{color: 'red'}} />
         <TestThemeTransfer staticStyle={{color: 'blue'}} />
       </span>
-    </ThemeProvider>
+    </RootThemeProvider>
   );
 
-  const theme = tp.instance().theme;
+  const theme = wrapper.state('theme');
   t.equal(theme.TestThemeTransfer.color, 'red', 'theme should be installed by the first component');
 
   t.end();
@@ -97,17 +113,17 @@ tape('theme provider merges user theme', t => {
 
   let actualStyles;
 
-  miniMount(
-    <ThemeProvider theme={userTheme}>
+  enzymeMount(
+    <RootThemeProvider theme={userTheme}>
       <Test3 renderWatcher = {componentTheme => {actualStyles = componentTheme;}} />
-    </ThemeProvider>
+    </RootThemeProvider>
   );
 
-  t.equal(actualStyles.color, 'orange', 'user-provided theme should override default component theme');
-  t.equal(actualStyles.fontSize, '30px', 'user should be able to augment component theme');
-  t.equal(actualStyles.outline, '2px dotted red', 'component theme should be included');
-
-  t.end();
+  return tick().then(() => {
+    t.equal(actualStyles.color, 'orange', 'user-provided theme should override default component theme');
+    t.equal(actualStyles.fontSize, '30px', 'user should be able to augment component theme');
+    t.equal(actualStyles.outline, '2px dotted red', 'component theme should be included');
+  });
 });
 
 tape('theme providers nest', t => {
@@ -120,7 +136,7 @@ tape('theme providers nest', t => {
       actualInnerStyles,
       actualDeepInnerStyles;
 
-  miniMount(
+  enzymeMount(
     <ThemeProvider theme={outerTheme}>
       <span>
         <Test3 renderWatcher = {componentTheme => {actualOuterStyles = componentTheme;}} />
@@ -136,15 +152,15 @@ tape('theme providers nest', t => {
     </ThemeProvider>
   );
 
-  t.equal(actualOuterStyles.color, 'green', 'outer theme should be used for outer components');
-  t.equal(actualOuterStyles.outline, '2px dotted red', 'outer theme should inherit default component theme');
+  return tick().then(() => {
+    t.equal(actualOuterStyles.color, 'green', 'outer theme should be used for outer components');
+    t.equal(actualOuterStyles.outline, '2px dotted red', 'outer theme should inherit default component theme');
 
-  t.equal(actualInnerStyles.color, 'red', 'inner theme should be used for inner components');
-  t.equal(actualInnerStyles.height, '100px', 'inner theme should inherit values from outer theme');
-  t.equal(actualInnerStyles.outline, '2px dotted red', 'inner theme should inherit default component theme');
+    t.equal(actualInnerStyles.color, 'red', 'inner theme should be used for inner components');
+    t.equal(actualInnerStyles.height, '100px', 'inner theme should inherit values from outer theme');
+    t.equal(actualInnerStyles.outline, '2px dotted red', 'inner theme should inherit default component theme');
 
-  t.equal(actualDeepInnerStyles.color, 'orange', 'deep inner theme should be used for deep inner components');
-  t.equal(actualDeepInnerStyles.height, '100px', 'deep inner theme should inherit values from outer theme');
-
-  t.end();
+    t.equal(actualDeepInnerStyles.color, 'orange', 'deep inner theme should be used for deep inner components');
+    t.equal(actualDeepInnerStyles.height, '100px', 'deep inner theme should inherit values from outer theme');
+  });
 });

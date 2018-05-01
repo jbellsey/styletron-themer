@@ -1,9 +1,7 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import assignDeep from 'assign-deep';
 import {shallow, mount as enzymeMount} from 'enzyme';
-import Styletron from 'styletron-client';
-import {StyletronProvider} from 'styletron-react';
+import {Server as StyletronServer} from 'styletron-engine-atomic';
+import StyletronProvider from '../../styletron-provider';
 import ThemeProvider from '../../theme-provider';
 
 //----------
@@ -11,6 +9,10 @@ import ThemeProvider from '../../theme-provider';
 //
 
 export {shallow};
+
+export function tick(ms = 1) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 // thin wrapper around the "mount" function provided by enzyme.
 // all we do here is ensure that we have a router object available
@@ -21,8 +23,8 @@ export function mount(
   {enzymeOptions, styletron} = {}
 ) {
 
-  return enzymeMount(
-    <StyletronProvider styletron={styletron || new Styletron()}>
+  const wrapper = enzymeMount(
+    <StyletronProvider styletron={styletron || new StyletronServer()}>
       <ThemeProvider theme={theme}>
         {node}
       </ThemeProvider>
@@ -33,42 +35,9 @@ export function mount(
     //
     enzymeOptions || undefined
   );
-}
 
-// mounts your component directly, not wrapped by Providers. this makes it possible
-// to access the enzyme API, which is mostly limited to running on the root component.
-// (e.g., you can't get the state or props of any component you get with "find"; you
-// can only query the root node.) we do this by spoofing the context that is normally
-// handled by the providers.
-//
-export function miniMount(node, additionalContext, additionalTypes) {
-  const enzymeOptions = {
-    context: assignDeep({
-      styletron: {
-        injectDeclaration: () => {}
-      },
-      themeProvider: {
-        theme: {},
-        installComponent: () => {},
-        applyMiddleware:  () => {}
-      }
-    }, additionalContext),
-    childContextTypes: assignDeep({
-      styletron: PropTypes.object.isRequired,
-      themeProvider: PropTypes.shape({
-        theme:            PropTypes.object.isRequired,
-        installComponent: PropTypes.func.isRequired,
-        applyMiddleware:  PropTypes.func.isRequired
-      }).isRequired
-    }, additionalTypes)
-  };
-
-  return enzymeMount(node, enzymeOptions);
-}
-
-
-export function delay(ms = 1) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  // we call update to force a re-render, which is needed to capture the state changes inside Styled
+  return tick().then(() => wrapper.update());
 }
 
 // turns a DOM node's attributes into an object map {class: '', id: ''}
