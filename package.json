@@ -1,6 +1,6 @@
 {
   "name": "styletron-themer",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "Themable component-building tool for Styletron & React",
   "keywords": [
     "Styletron",
@@ -16,12 +16,9 @@
     "build": "rollup -c rollup.config.js",
     "test": "NODE_ENV=TEST karma start",
     "test:ci": "NODE_ENV=TEST TEST_ENV=ci karma start",
-    "lint": "eslint .",
-    "lint:fix": "npm run lint -- --fix",
     "prepare": "npm run build"
   },
   "pre-commit": [
-    "lint"
   ],
   "repository": {
     "type": "git",
@@ -31,49 +28,48 @@
   "license": "MIT",
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "babel-eslint": "^7.2.3",
-    "babel-loader": "^7.1.2",
+    "babel-loader": "^7.1.4",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
-    "babel-preset-env": "^1.6.0",
+    "babel-preset-env": "^1.6.1",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "babel-preset-stage-1": "^6.24.1",
     "blue-tape": "^1.0.0",
-    "enzyme": "^2.9.1",
-    "eslint": "^4.6.1",
+    "core-js": "^2.5",
+    "enzyme": "^3.3",
+    "enzyme-adapter-react-16": "^1.1",
+    "eslint": "^4.19",
     "eslint-config-babel": "^7.0.2",
-    "eslint-plugin-react": "^7.3.0",
-    "eslint-plugin-standard": "^3.0.1",
+    "eslint-plugin-react": "^7.7",
+    "eslint-plugin-standard": "^3.1",
     "faucet": "0.0.1",
     "karma": "^1.7.1",
     "karma-babel-preprocessor": "^6.0.1",
     "karma-phantomjs-launcher": "^1.0.4",
-    "karma-tap": "^3.1.1",
-    "karma-tap-pretty-reporter": "^3.0.5",
-    "karma-webpack": "^2.0.4",
-    "native-promise-only": "^0.8.1",
+    "karma-tap": "^3.1",
+    "karma-tap-pretty-reporter": "^4.0",
+    "karma-webpack": "^2.0",
     "pre-commit": "^1.2.2",
-    "react": "^15",
-    "react-addons-test-utils": "^15.6.0",
-    "react-dom": "^15",
-    "react-test-renderer": "^15.6.1",
-    "rollup": "^0.49.2",
-    "rollup-plugin-babel": "^3.0.2",
-    "rollup-plugin-commonjs": "^8.2",
-    "rollup-plugin-node-resolve": "^3.0.0",
-    "styletron": "^2.5",
-    "styletron-react": "^2.5.8",
-    "styletron-utils": "^2.5",
+    "prop-types": "^15.6",
+    "react": "^16.3",
+    "react-dom": "^16.3",
+    "react-test-renderer": "^16.3",
+    "rollup": "^0.58",
+    "rollup-plugin-babel": "^3.0",
+    "rollup-plugin-commonjs": "^9.1",
+    "rollup-plugin-node-resolve": "^3.3",
+    "styletron-engine-atomic": "^1.0.5",
     "webpack": "^3.5"
   },
   "peerDependencies": {
-    "prop-types": "^15.5",
-    "react": "^15 || ^16",
-    "styletron-utils": "^2.5"
+    "prop-types": "^15.6",
+    "react": "^16.3",
+    "styletron-engine-atomic": "^1"
   },
   "dependencies": {
-    "assign-deep": "^0.4"
+    "assign-deep": "^0.4",
+    "react": "^16.3"
   }
 }

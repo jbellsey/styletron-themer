@@ -24,7 +24,7 @@ npm install --save styletron-themer
 There are some unsurprising peer dependencies: 
 * react
 * prop-types
-* styletron-utils
+* styletron-engine-atomic
 
 ## Building & testing
 
@@ -43,8 +43,3 @@ They are generated with rollup, using the following script:
 ```bash
 npm run build
 ```
-
-You can also run the linter (`npm run lint` or `npm run lint:fix`).
-
-The linter is run prior to any commit. If you try to commit but it seems to fail, check
-your console, as there are likely to be linting errors.

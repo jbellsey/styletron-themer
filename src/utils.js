@@ -1,3 +1,4 @@
+import React from 'react';
 
 export function getDisplayName(Component) {
   let name = Component.displayName || Component.name;
@@ -9,6 +10,9 @@ export function getDisplayName(Component) {
 
   if (typeof Component.type === 'string')
     return Component.type;
+
+  if (Component.type === React.Fragment)
+    return 'Fragment';
 
   if (typeof Component.type === 'function')
     return getDisplayName(Component.type);
